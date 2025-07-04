@@ -8,10 +8,17 @@
         <option value="$PROJECT_DIR$/backend/shipping-service/pom.xml" />
         <option value="$PROJECT_DIR$/backend/billing-service/pom.xml" />
         <option value="$PROJECT_DIR$/backend/ai-prediction-service/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/Gateway-service/Gateway-service/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/Gateway-service/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/user-service/pom.xml" />
+        <option value="$PROJECT_DIR$/discovery-service/pom.xml" />
+        <option value="$PROJECT_DIR$/product-service/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/discovery-service/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/product-service/pom.xml" />
       </list>
     </option>
   </component>
-  <component name="ProjectRootManager">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_23" default="true" project-jdk-name="23 (4)" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

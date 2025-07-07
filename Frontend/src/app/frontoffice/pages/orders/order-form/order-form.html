@@ -1,0 +1,51 @@
+<form [formGroup]="orderForm" (ngSubmit)="submit()" class="order-form">
+  <!-- Status -->
+  <div class="p-field p-mb-3">
+    <label for="status">Status</label>
+    <input id="status" type="text" pInputText formControlName="status" />
+    <small *ngIf="orderForm.get('status')?.invalid && (orderForm.get('status')?.touched || orderForm.get('status')?.dirty)" class="p-error">
+      Status is required.
+    </small>
+  </div>
+
+  <!-- Created Date -->
+  <div class="p-field p-mb-3">
+    <label for="createdDate">Created Date</label>
+    <input id="createdDate" type="date" pInputText formControlName="createdDate" />
+    <small *ngIf="orderForm.get('createdDate')?.invalid && (orderForm.get('createdDate')?.touched || orderForm.get('createdDate')?.dirty)" class="p-error">
+      Created date is required.
+    </small>
+  </div>
+
+  <!-- Shipping Method -->
+  <div class="p-field p-mb-3">
+    <label for="shippingMethod">Shipping Method</label>
+    <input id="shippingMethod" type="text" pInputText formControlName="shippingMethod" />
+  </div>
+
+  <!-- Delivery Location -->
+  <div class="p-field p-mb-3">
+    <label for="deliveryLocation">Delivery Location</label>
+    <input id="deliveryLocation" type="text" pInputText formControlName="deliveryLocation" />
+  </div>
+
+  <!-- Total Amount -->
+  <div class="p-field p-mb-4">
+    <label for="totalAmount">Total Amount</label>
+    <input id="totalAmount" type="number" pInputText formControlName="totalAmount" placeholder="e.g. 150.00" />
+    <small *ngIf="orderForm.get('totalAmount')?.invalid && (orderForm.get('totalAmount')?.touched || orderForm.get('totalAmount')?.dirty)" class="p-error">
+      Must be greater than or equal to 0.
+    </small>
+  </div>
+
+  <!-- Submit Button -->
+  <div class="p-d-flex p-jc-end">
+    <button
+      pButton
+      type="submit"
+      label="💖 Submit Order"
+      [disabled]="orderForm.invalid"
+      class="cute-button"
+    ></button>
+  </div>
+</form>

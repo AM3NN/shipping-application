@@ -1,0 +1,128 @@
+/* navbar.css */
+
+/* Host wrapper to stick navbar on top with full width */
+:host {
+  display: block;
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  background-color: #1e293b; /* dark slate blue-gray */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Menubar container */
+.p-menubar {
+  border: none;
+  background-color: transparent; /* use host bg */
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  padding: 0 2rem;
+  gap: 2rem; /* more space between menu items */
+  font-weight: 600;
+  font-size: 1rem;
+  color: #e0e7ff; /* light slate blue */
+}
+
+/* Menubar menu item link */
+.p-menubar .p-menuitem-link {
+  color: #e0e7ff;
+  padding: 0.7rem 1.5rem;
+  border-radius: 30px; /* pill shape */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem; /* icon and label spacing */
+  transition:
+    background-color 0.25s ease,
+    box-shadow 0.25s ease,
+    color 0.25s ease;
+  box-shadow: none;
+}
+
+/* Hover effect: subtle glow and light background */
+.p-menubar .p-menuitem-link:hover {
+  background-color: #3b82f6; /* bright blue */
+  color: #fff;
+  box-shadow: 0 0 10px 3px rgba(59, 130, 246, 0.6);
+  cursor: pointer;
+}
+
+/* Active/selected menu item */
+.p-menubar .p-menuitem-link.p-highlight {
+  background-color: #2563eb; /* deeper blue */
+  color: #fff;
+  box-shadow: 0 0 12px 4px rgba(37, 99, 235, 0.8);
+}
+
+/* Icons inside menu items */
+.p-menubar .p-menuitem-icon {
+  font-size: 1.25rem;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+
+/* Navbar title styling */
+.navbar-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #f8fafc; /* very light */
+  margin-right: 3rem;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+/* Navbar buttons on the right */
+.navbar-button {
+  margin-left: 1.5rem;
+  padding: 0.35rem 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  background-color: #facc15; /* amber */
+  border-radius: 9999px; /* full pill */
+  border: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 2px 8px rgb(250 204 21 / 0.5);
+}
+
+.navbar-button:hover {
+  background-color: #ca8a04; /* darker amber */
+  color: #fff;
+  box-shadow: 0 4px 12px rgb(202 138 4 / 0.8);
+}
+
+/* Spacing between buttons if multiple */
+.p-menubar > .p-menubar-end > button + button {
+  margin-left: 1rem;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .p-menubar {
+    padding: 0 1rem;
+    gap: 1rem;
+  }
+
+  .navbar-title {
+    font-size: 1.25rem;
+    margin-right: 1rem;
+  }
+  /* Style the "New Order" button */
+  .p-menubar .p-menuitem-link.new-order-btn {
+    background-color: #4caf50; /* green */
+    color: white !important;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.3s ease;
+  }
+
+  .p-menubar .p-menuitem-link.new-order-btn:hover {
+    background-color: #45a049;
+    color: white !important;
+  }
+
+}

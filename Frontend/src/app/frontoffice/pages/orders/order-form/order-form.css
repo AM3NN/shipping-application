@@ -1,0 +1,40 @@
+.order-form {
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+}
+
+.p-field {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.p-error {
+  color: #e53e3e;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+.p-field small.p-error {
+  display: block;
+  margin-top: 0.25rem;
+  color: #e74c3c;
+  font-size: 0.875rem;
+}
+
+.cute-button {
+  background-color: #ef4444 !important;
+  border-color: #ef4444 !important;
+}
+
+.cute-button:hover {
+  background-color: #dc2626 !important;
+}

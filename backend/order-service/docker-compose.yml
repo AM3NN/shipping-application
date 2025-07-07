@@ -24,8 +24,6 @@
 #
 #volumes:
 #  mongo-data:
-version: '3.8'
-
 services:
   mongo:
     image: mongo:6.0

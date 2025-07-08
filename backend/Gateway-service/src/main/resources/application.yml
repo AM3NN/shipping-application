@@ -4,6 +4,7 @@ server:
 spring:
   application:
     name: gateway-service
+
   main:
     web-application-type: reactive
   security:
@@ -27,11 +28,15 @@ spring:
         - id: product-service
           uri: lb://PRODUCT-SERVICE
           predicates:
-            - Path=/api/products/**
-      discovery:
-        locator:
-          enabled: false
-          lower-case-service-id: true
+            - Path=api/products/**
+
+      server:
+        webflux:
+          discovery:
+            locator:
+              lower-case-service-id: true
+              enabled: false
+
 springdoc:
   swagger-ui:
     urls:

@@ -1,0 +1,6 @@
+# Ignorer node_modules dans stagefront
+/stage-front/node_modules/
+
+# Autres ignorés courants
+/dist/
+/build/

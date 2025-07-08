@@ -4,10 +4,13 @@ server:
 spring:
   application:
     name: gateway-service
-
   main:
     web-application-type: reactive
-
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/test
   cloud:
     config:
       enabled: false
@@ -24,13 +27,11 @@ spring:
         - id: product-service
           uri: lb://PRODUCT-SERVICE
           predicates:
-            - Path=/products/**
-
+            - Path=/api/products/**
       discovery:
         locator:
-          enabled: true
+          enabled: false
           lower-case-service-id: true
-
 springdoc:
   swagger-ui:
     urls:
@@ -53,3 +54,8 @@ eureka:
       defaultZone: http://localhost:8761/eureka
   instance:
     prefer-ip-address: true
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: DEBUG

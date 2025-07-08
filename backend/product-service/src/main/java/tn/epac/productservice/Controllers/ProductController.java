@@ -10,7 +10,7 @@ import tn.epac.productservice.Services.IproductService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/productss") // ✅ Corrigé: 'productss' → 'products'
+@RequestMapping("/api/products") // ✅ Corrigé: 'productss' → 'products'
 @RequiredArgsConstructor
 public class ProductController {
 

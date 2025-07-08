@@ -1,0 +1,65 @@
+<div class="order-form">
+  <div class="form-header">
+    <h2>Create New Order</h2>
+  </div>
+
+  <form [formGroup]="orderForm" (ngSubmit)="submit()">
+    <!-- Shipping Method -->
+    <div class="form-group">
+      <label for="shippingMethod">Shipping Method</label>
+      <select id="shippingMethod" formControlName="shippingMethod">
+        <option value="" disabled selected>Select a shipping method</option> <!-- 🔹 Placeholder -->
+        <option value="FEDEX">FedEx</option>
+        <option value="DHL">DHL</option>
+      </select>
+      <small class="error-message" *ngIf="orderForm.get('shippingMethod')?.invalid && orderForm.get('shippingMethod')?.touched">
+        Please select a shipping method
+      </small>
+    </div>
+
+
+    <!-- Delivery Location -->
+    <div class="form-group">
+      <label for="deliveryLocation">Delivery Address</label>
+      <input id="deliveryLocation" type="text" formControlName="deliveryLocation" placeholder="123 Main St, City">
+      <small class="error-message" *ngIf="orderForm.get('deliveryLocation')?.invalid && orderForm.get('deliveryLocation')?.touched">
+        Delivery address is required
+      </small>
+    </div>
+
+    <!-- Expected Date -->
+    <div class="form-group">
+      <label for="expectedDate">Expected Delivery Date</label>
+      <input id="expectedDate" type="date" formControlName="expectedDate">
+      <small class="error-message" *ngIf="orderForm.get('expectedDate')?.invalid && orderForm.get('expectedDate')?.touched">
+        Please select a valid future date
+      </small>
+    </div>
+
+    <!-- Financial Section -->
+    <div class="form-row">
+      <!-- Shipping Cost -->
+      <div class="form-group">
+        <label for="shippingCost">Shipping Cost</label>
+        <div style="position: relative;">
+          <input id="shippingCost" type="number" step="0.01" formControlName="shippingCost" placeholder="0.00">
+
+        </div>
+      </div>
+
+      <!-- Total Amount -->
+      <div class="form-group">
+        <label for="totalAmount">Total Amount</label>
+        <div style="position: relative;">
+          <input id="totalAmount" type="number" step="0.01" formControlName="totalAmount" placeholder="0.00">
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" class="submit-button" [disabled]="orderForm.invalid">
+      <i class="pi pi-check"></i> Create Order
+    </button>
+  </form>
+</div>

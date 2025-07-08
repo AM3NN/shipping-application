@@ -1,0 +1,42 @@
+<p-table
+    [value]="orders"
+    [paginator]="true"
+    [rows]="5"
+    class="custom-order-table"
+>
+    <ng-template pTemplate="caption">
+        <div class="table-caption">
+            <h2>📦 Order List</h2>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+        <tr>
+            <th pSortableColumn="id">ID <p-sortIcon field="id" /></th>
+            <th pSortableColumn="status">Status <p-sortIcon field="status" /></th>
+            <th pSortableColumn="createdDate">Created <p-sortIcon field="createdDate" /></th>
+            <th pSortableColumn="totalAmount">Total <p-sortIcon field="totalAmount" /></th>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-order>
+        <tr>
+            <td class="order-id">{{ order.id }}</td>
+            <td>
+                <p-badge class="{{ getOrderStatusClass(order.status) }}" [value]="order.status"></p-badge>
+            </td>
+            <td>{{ order.createdDate | date: 'short' }}</td>
+            <td class="total-amount">
+                <strong>{{ order.totalAmount }}</strong> {{ order.totalCurrency }}
+            </td>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+        <tr>
+            <td colspan="4" class="text-center text-muted">
+                {{ error || 'No orders found.' }}
+            </td>
+        </tr>
+    </ng-template>
+</p-table>

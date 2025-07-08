@@ -6,21 +6,14 @@ import { MenuItem } from 'primeng/api';
 
 @Component({
   selector: 'app-navbar',
-  standalone: true, // ✅ Important for standalone component
-  imports: [CommonModule, RouterModule, MenubarModule], // ✅ You had this empty
-  templateUrl: './navbar.html', // ✅ OK
-  styleUrls: ['./navbar.css']   // ❌ was 'styleUrl' → corrected to 'styleUrls'
+  standalone: true,
+  imports: [CommonModule, RouterModule, MenubarModule],
+  templateUrl: './navbar.html',
+  styleUrls: ['./navbar.css']
 })
 export class NavbarComponent {
   items: MenuItem[] = [];
 
   ngOnInit() {
-    this.items = [
-      { label: '🏠 Home', routerLink: '/' },
-      { label: '➕ New Order', routerLink: '/order-form', styleClass: 'new-order-btn' }, // Add this button
-      { label: '📦 Orders', routerLink: '/orders' },
-      { label: '📊 Dashboard', routerLink: '/dashboard' },
-      { label: '⚙️ Settings', routerLink: '/settings' }
-    ];
   }
 }

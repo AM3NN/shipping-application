@@ -1,9 +1,10 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { BadgeModule } from 'primeng/badge';
-import { Order } from '../models/order';
-import { OrderService } from '../services/order';
+import { Order } from '../../models/order';
+import { OrderService } from '../../services/order';
+
 
 @Component({
   selector: 'app-order-list',
@@ -11,7 +12,6 @@ import { OrderService } from '../services/order';
   imports: [CommonModule, TableModule, BadgeModule],
   templateUrl: './order-list.html',
   styleUrls: ['./order-list.css'],
-  encapsulation: ViewEncapsulation.None // ✅ Required for global styles to apply to PrimeNG components
 })
 
 export class OrderListComponent implements OnInit {

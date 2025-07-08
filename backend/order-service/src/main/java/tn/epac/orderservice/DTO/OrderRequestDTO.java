@@ -12,8 +12,8 @@ public class OrderRequestDTO {
     private String shippingLocation;      // add if needed (you had it in entity)
     private String deliveryLocation;
     private LocalDate createdDate;
-    private LocalDate expectedDate;       // optional, add if needed
-    private LocalDate closedDate;         // optional, add if needed
+    private LocalDate expectedDate;
+    private LocalDate closedDate;
 
     private String reference;
     private String type;

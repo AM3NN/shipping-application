@@ -1,0 +1,145 @@
+/* Navbar Container - Cute & Professional */
+:host {
+    display: block;
+    width: 100%;
+    position: sticky;
+    top: 0;
+    z-index: 1100;
+    background-color: #ffffff;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.p-menubar {
+    border: none !important;
+    background: linear-gradient(135deg, #f9f9ff 0%, #ffffff 100%) !important;
+    padding: 0 2rem !important;
+    height: 4.5rem;
+    border-radius: 12px !important;
+}
+
+/* Title with cute truck animation */
+.navbar-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #5e72e4;
+    margin-right: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-shadow: 0 2px 4px rgba(94, 114, 228, 0.1);
+}
+
+.navbar-title::after {
+    content: '🚛';
+    font-size: 1.4rem;
+    transition: transform 0.3s ease;
+}
+
+.navbar-title:hover::after {
+    transform: translateX(5px) rotate(10deg);
+}
+
+/* Button Base Styles */
+.nav-button,
+.new-order-button,
+.navbar-button {
+    margin-left: 0.80rem !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.3px;
+    font-size: 1rem !important;          /* 🔼 Increased font size */
+    padding: 0.75rem 1.5rem !important;  /* 🔼 Increased padding */
+    min-width: 140px !important;
+}
+
+.nav-button {
+    color: #667eea !important;
+    background-color: rgba(102, 126, 234, 0.1) !important;
+    border: 1px solid transparent !important;
+}
+
+.nav-button:hover {
+    color: #fff !important;
+    background-color: #667eea !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2) !important;
+    transform: translateY(-2px);
+}
+.navbar-button {
+    background: linear-gradient(135deg, #ac4b78 0%, #070707 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 14px rgba(237, 100, 166, 0.3) !important;
+}
+
+.navbar-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(237, 100, 166, 0.4) !important;
+}
+
+.pi {
+    margin-right: 0.5rem;
+    transition: transform 0.3s ease;
+}
+
+button:hover .pi {
+    transform: scale(1.1);
+}
+
+/* Active Route Indicator */
+.router-link-active {
+    position: relative;
+}
+
+.router-link-active::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 3px;
+    background-color: #5e72e4;
+    border-radius: 3px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .p-menubar {
+        padding: 0 1.25rem !important;
+        height: 4rem;
+    }
+
+    .navbar-title {
+        font-size: 1.3rem;
+        margin-right: 1rem;
+    }
+
+    .nav-button span,
+    .new-order-button span,
+    .navbar-button span {
+        display: none;
+    }
+
+    .pi {
+        margin-right: 0;
+        font-size: 1.2rem;
+    }
+
+    button {
+        min-width: 400px !important;
+        padding: 50rem !important;
+    }
+}
+
+/* Small animation for the whole navbar */
+@keyframes gentleBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+:host {
+    animation: gentleBounce 5s ease-in-out infinite;
+    animation-delay: 1s;
+}

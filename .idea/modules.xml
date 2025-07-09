@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/backend/ai-prediction-service/ai-prediction-service.iml" filepath="$PROJECT_DIR$/backend/ai-prediction-service/ai-prediction-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/backend/e/Gateway-service/src/main/main.iml" filepath="$PROJECT_DIR$/backend/e/Gateway-service/src/main/main.iml" />
       <module fileurl="file://$PROJECT_DIR$/shipping application.iml" filepath="$PROJECT_DIR$/shipping application.iml" />
       <module fileurl="file://$PROJECT_DIR$/backend/e/Gateway-service/src/test/test.iml" filepath="$PROJECT_DIR$/backend/e/Gateway-service/src/test/test.iml" />

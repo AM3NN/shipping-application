@@ -1,5 +1,6 @@
 package tn.epac.orderservice.Services;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tn.epac.orderservice.DTO.OrderRequestDTO;
 import tn.epac.orderservice.DTO.OrderResponseDTO;
@@ -10,9 +11,11 @@ import tn.epac.orderservice.Repository.OrderRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Service
 public class OrderServiceImpl implements OrderService {
-
+    @Autowired
+    private PredictionService predictionService;
     private final OrderRepository orderRepository;
 
     public OrderServiceImpl(OrderRepository orderRepository) {

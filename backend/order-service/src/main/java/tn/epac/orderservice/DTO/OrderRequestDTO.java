@@ -30,4 +30,6 @@ public class OrderRequestDTO {
     private String taxCurrency;
     private BigDecimal totalAmount;
     private String totalCurrency;
+    private BigDecimal predictedPrice;
+    private String estimatedFabricationTime;
 }

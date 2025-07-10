@@ -1,12 +1,14 @@
 package tn.epac.productservice.Controllers;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tn.epac.productservice.DTO.InventoryDTO;
+import tn.epac.productservice.Entities.Inventory;
 import tn.epac.productservice.Services.IInventoryservice;
 
 import java.util.List;
-
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/inventories")
 public class InventoryController {
@@ -44,6 +46,22 @@ public class InventoryController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInventory(@PathVariable String id) {
         inventoryService.deleteInventory(id);
+        return ResponseEntity.noContent().build();
+    }
+    @PostMapping("/assign")
+    public ResponseEntity<Inventory> assign(
+            @RequestParam String productId,
+            @RequestParam String warehouseId,
+            @RequestParam int quantity
+    ) {
+        Inventory inventory = inventoryService.assignProductToWarehouse(productId, warehouseId, quantity);
+        return ResponseEntity.ok(inventory);
+    }
+
+    // ❌ Supprimer une assignation
+    @DeleteMapping("/{inventoryId}")
+    public ResponseEntity<Void> unassign(@PathVariable String inventoryId) {
+        inventoryService.unassignInventory(inventoryId);
         return ResponseEntity.noContent().build();
     }
 }

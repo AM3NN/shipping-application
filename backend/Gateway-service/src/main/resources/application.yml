@@ -24,12 +24,21 @@ spring:
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/user/**
+            - Path=/user-service/**
         - id: product-service
           uri: lb://PRODUCT-SERVICE
           predicates:
-            - Path=api/products/**
-
+            - Path=/product-service/**
+          filters:
+            - StripPrefix=1
+        - id: product-service-swagger
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/products/v3/api-docs
+        - id: user-service-swagger
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user/v3/api-docs
       server:
         webflux:
           discovery:

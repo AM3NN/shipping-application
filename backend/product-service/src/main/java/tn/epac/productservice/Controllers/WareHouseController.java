@@ -1,6 +1,7 @@
 package tn.epac.productservice.Controllers;
 
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,7 +9,7 @@ import tn.epac.productservice.DTO.WarehouseDTO;
 import tn.epac.productservice.Services.IwarehouseService;
 
 import java.util.List;
-
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/warehouses")
 @RequiredArgsConstructor

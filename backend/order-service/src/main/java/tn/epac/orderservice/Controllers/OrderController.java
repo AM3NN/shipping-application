@@ -31,4 +31,15 @@ public class OrderController {
     public OrderResponseDTO getOrderById(@PathVariable String id) {
         return orderService.getOrderById(id);
     }
+
+    @PutMapping("/{id}")
+    public OrderResponseDTO updateOrder(@PathVariable String id,
+                                        @RequestBody OrderRequestDTO orderRequestDTO) {
+        return orderService.updateOrder(id, orderRequestDTO);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteOrder(@PathVariable String id) {
+        orderService.deleteOrder(id);
+    }
 }

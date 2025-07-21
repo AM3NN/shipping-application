@@ -26,6 +26,7 @@ public class Order {
     private LocalDate createdDate;
     private LocalDate expectedDate;
     private LocalDate closedDate;
+    private Integer quantity;
 
     private String reference;
     private String type;
@@ -42,7 +43,7 @@ public class Order {
     private String taxCurrency;
     private BigDecimal totalAmount;
     private String totalCurrency;
-    private BigDecimal predictedPrice;
+    private double predictedPrice;
     private String estimatedFabricationTime;
 
 

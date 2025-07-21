@@ -9,17 +9,23 @@ import java.time.LocalDate;
 public class OrderRequestDTO {
     private String status;
     private String shippingMethod;
-    private String shippingLocation;      // add if needed (you had it in entity)
+    private String shippingLocation;
     private String deliveryLocation;
     private LocalDate createdDate;
     private LocalDate expectedDate;
     private LocalDate closedDate;
-
+    private Double height;
+    private Double width;
+    private Double thickness;
+    private Double weight;
     private String reference;
     private String type;
     private String direction;
     private String domain;
-
+    private Integer quantity;
+    private String textPaperType;
+    private String coverFinishType;
+    private String bindingType;
     private BigDecimal shippingCost;
     private String shippingCurrency;
     private BigDecimal discount;
@@ -30,6 +36,6 @@ public class OrderRequestDTO {
     private String taxCurrency;
     private BigDecimal totalAmount;
     private String totalCurrency;
-    private BigDecimal predictedPrice;
+    private Double predictedPrice;
     private String estimatedFabricationTime;
 }

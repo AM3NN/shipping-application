@@ -16,4 +16,8 @@ public interface IInventoryservice {
     Inventory assignProductToWarehouse(String productId, String warehouseId, int availableQuantity);
 
     void unassignInventory(String inventoryId);
+
+    List<InventoryDTO> getInventoriesByWarehouse(String warehouseId);
+
+    List<InventoryDTO> getInventoriesByProduct(String productId);
 }

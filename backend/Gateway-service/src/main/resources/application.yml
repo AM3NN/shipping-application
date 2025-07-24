@@ -31,6 +31,10 @@ spring:
             - Path=/product-service/**
           filters:
             - StripPrefix=1
+        - id: shipping-service
+          uri: lb://SHIPPING-SERVICE
+          predicates:
+          - Path=/shipping-service/**
         - id: product-service-swagger
           uri: lb://PRODUCT-SERVICE
           predicates:
@@ -39,6 +43,10 @@ spring:
           uri: lb://USER-SERVICE
           predicates:
             - Path=/user/v3/api-docs
+        - id: shipping-service-swagger
+          uri: lb://SHIPPING-SERVICE
+          predicates:
+            - Path=/shipping/v3/api-docs
       server:
         webflux:
           discovery:
@@ -57,6 +65,8 @@ springdoc:
         url: /user/v3/api-docs
       - name: product-service
         url: /products/v3/api-docs
+      - name: shipping-service
+        url: /shipping/v3/api-docs
 
   api-docs:
     path: /v3/api-docs
@@ -73,3 +83,6 @@ logging:
     org.springframework.security: DEBUG
     org.springframework.cloud.gateway: DEBUG
     reactor.netty: DEBUG
+app:
+  swagger:
+       gateway-mode: true

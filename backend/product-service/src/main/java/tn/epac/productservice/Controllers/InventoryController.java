@@ -31,9 +31,15 @@ public class InventoryController {
 
     @GetMapping("/{id}")
     public ResponseEntity<InventoryDTO> getInventoryById(@PathVariable String id) {
-        return ResponseEntity.ok(inventoryService.getInventoryById(id));
+        InventoryDTO inventory = inventoryService.getInventoryById(id);  // Laisse passer l'exception
+        return ResponseEntity.ok(inventory);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteInventory(@PathVariable String id) {
+        inventoryService.deleteInventory(id);  // Laisse passer l'exception
+        return ResponseEntity.noContent().build();
+    }
     @PutMapping("/{id}")
     public ResponseEntity<InventoryDTO> updateInventory(
             @PathVariable String id,
@@ -43,11 +49,7 @@ public class InventoryController {
         return ResponseEntity.ok(updated);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteInventory(@PathVariable String id) {
-        inventoryService.deleteInventory(id);
-        return ResponseEntity.noContent().build();
-    }
+
     @PostMapping("/assign")
     public ResponseEntity<Inventory> assign(
             @RequestParam String productId,
@@ -63,5 +65,14 @@ public class InventoryController {
     public ResponseEntity<Void> unassign(@PathVariable String inventoryId) {
         inventoryService.unassignInventory(inventoryId);
         return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/warehouse/{warehouseId}")
+    public ResponseEntity<List<InventoryDTO>> getByWarehouse(@PathVariable String warehouseId) {
+        return ResponseEntity.ok(inventoryService.getInventoriesByWarehouse(warehouseId));
+    }
+
+    @GetMapping("/product/{productId}")
+    public ResponseEntity<List<InventoryDTO>> getByProduct(@PathVariable String productId) {
+        return ResponseEntity.ok(inventoryService.getInventoriesByProduct(productId));
     }
 }

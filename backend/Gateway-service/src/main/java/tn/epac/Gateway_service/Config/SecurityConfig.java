@@ -32,12 +32,14 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/swagger-ui.html", "/v3/api-docs/**", "/webjars/**", "/products/v3/api-docs/**","/user/v3/api-docs/**").permitAll()
+                        .pathMatchers("/swagger-ui.html", "/v3/api-docs/**", "/webjars/**", "/products/v3/api-docs/**","/user/v3/api-docs/**","/shipping/v3/api-docs/**").permitAll()
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/products/**").permitAll()
                         .pathMatchers("/order-service/**").hasAuthority("ROLE_ADMIN")
                         .pathMatchers("/user-service/**").hasAuthority("ROLE_ADMIN")
-                        .pathMatchers("/product-service/**").hasAuthority("ROLE_ADMIN") // <== Seul ADMIN doit y accéder
+                        .pathMatchers("/product-service/**").hasAuthority("ROLE_ADMIN")
+                        .pathMatchers("/shipping-service/**").hasAuthority("ROLE_ADMIN")
+                    // <== Seul ADMIN doit y accéder
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

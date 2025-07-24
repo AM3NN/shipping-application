@@ -7,6 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InventoryDTO {
+    private String id;
     private int reservedQuantity;
     private int availableQuantity;
     private String warehouseId;

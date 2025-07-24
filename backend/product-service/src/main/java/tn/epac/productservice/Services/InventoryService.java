@@ -1,10 +1,12 @@
 package tn.epac.productservice.Services;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tn.epac.productservice.DTO.InventoryDTO;
 import tn.epac.productservice.Entities.Inventory;
 import tn.epac.productservice.Entities.Product;
 import tn.epac.productservice.Entities.Warehouse;
+import tn.epac.productservice.Exceptions.ResourceNotFoundException;
 import tn.epac.productservice.Repositories.InventoryRepository;
 import tn.epac.productservice.Repositories.ProductRepository;
 import tn.epac.productservice.Repositories.WarehouseRepository;
@@ -18,8 +20,9 @@ import java.util.stream.Collectors;
 public class InventoryService implements IInventoryservice {
 
     private final InventoryRepository inventoryRepository;
-     private final ProductRepository productRepository;
-     private final WarehouseRepository warehouseRepository;
+    private final ProductRepository productRepository;
+    private final WarehouseRepository warehouseRepository;
+
     @Override
     public InventoryDTO createInventory(InventoryDTO dto) {
         Inventory inventory = new Inventory(null, dto.getReservedQuantity(), dto.getAvailableQuantity(), dto.getWarehouseId(), dto.getProductId());
@@ -36,14 +39,14 @@ public class InventoryService implements IInventoryservice {
     @Override
     public InventoryDTO getInventoryById(String id) {
         Inventory i = inventoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Inventaire avec ID " + id + " non trouvé"));
         return mapToDTO(i);
     }
 
     @Override
     public InventoryDTO updateInventory(String id, InventoryDTO dto) {
         Inventory inv = inventoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Inventaire avec ID " + id + " non trouvé"));
         inv.setReservedQuantity(dto.getReservedQuantity());
         inv.setAvailableQuantity(dto.getAvailableQuantity());
         inv.setProductId(dto.getProductId());
@@ -53,11 +56,15 @@ public class InventoryService implements IInventoryservice {
 
     @Override
     public void deleteInventory(String id) {
+        if (!inventoryRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Inventaire avec ID " + id + " non trouvé");
+        }
         inventoryRepository.deleteById(id);
     }
 
     private InventoryDTO mapToDTO(Inventory inv) {
         return new InventoryDTO(
+                inv.getId(),
                 inv.getReservedQuantity(),
                 inv.getAvailableQuantity(),
                 inv.getWarehouseId(),
@@ -65,15 +72,13 @@ public class InventoryService implements IInventoryservice {
         );
     }
 
-
-    // ✅ Assigner un produit à un entrepôt
     @Override
     public Inventory assignProductToWarehouse(String productId, String warehouseId, int availableQuantity) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Produit non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Produit avec ID " + productId + " non trouvé"));
 
         Warehouse warehouse = warehouseRepository.findById(warehouseId)
-                .orElseThrow(() -> new RuntimeException("Entrepôt non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Entrepôt avec ID " + warehouseId + " non trouvé"));
 
         Inventory inventory = new Inventory();
         inventory.setProductId(productId);
@@ -83,7 +88,6 @@ public class InventoryService implements IInventoryservice {
 
         Inventory savedInventory = inventoryRepository.save(inventory);
 
-        // Mettre à jour les inventaires du produit
         if (product.getInventoryIds() == null)
             product.setInventoryIds(new ArrayList<>());
         product.getInventoryIds().add(savedInventory.getId());
@@ -91,12 +95,12 @@ public class InventoryService implements IInventoryservice {
 
         return savedInventory;
     }
+
     @Override
     public void unassignInventory(String inventoryId) {
         Inventory inventory = inventoryRepository.findById(inventoryId)
-                .orElseThrow(() -> new RuntimeException("Inventaire non trouvé"));
+                .orElseThrow(() -> new ResourceNotFoundException("Inventaire avec ID " + inventoryId + " non trouvé"));
 
-        // Supprimer la référence dans le produit
         Product product = productRepository.findById(inventory.getProductId()).orElse(null);
         if (product != null && product.getInventoryIds() != null) {
             product.getInventoryIds().remove(inventoryId);
@@ -106,4 +110,17 @@ public class InventoryService implements IInventoryservice {
         inventoryRepository.deleteById(inventoryId);
     }
 
+    @Override
+    public List<InventoryDTO> getInventoriesByWarehouse(String warehouseId) {
+        return inventoryRepository.findByWarehouseId(warehouseId).stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<InventoryDTO> getInventoriesByProduct(String productId) {
+        return inventoryRepository.findByProductId(productId).stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
 }

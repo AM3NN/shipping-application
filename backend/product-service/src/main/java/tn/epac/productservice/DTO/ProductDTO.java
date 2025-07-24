@@ -3,13 +3,12 @@ package tn.epac.productservice.DTO;
 import lombok.*;
 
 import java.util.List;
-
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
-@ToString
+@NoArgsConstructor
+@Builder
 public class ProductDTO {
+    private String id;
     private String name;
     private String reference;
     private String description;

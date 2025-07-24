@@ -13,10 +13,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Inventory {
     @Id
     private String id;
-
     private int reservedQuantity;
     private int availableQuantity;
-
     private String warehouseId; // Référence à Warehouse
     private String productId;   // Référence à Product
 }

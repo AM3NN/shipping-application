@@ -11,7 +11,7 @@ import tn.epac.productservice.Services.IproductService;
 import java.util.List;
 @SecurityRequirement(name = "bearerAuth")
 @RestController
-@RequestMapping("/api/products") // ✅ Corrigé: 'productss' → 'products'
+@RequestMapping("/api/products")
 @RequiredArgsConstructor
 public class ProductController {
 

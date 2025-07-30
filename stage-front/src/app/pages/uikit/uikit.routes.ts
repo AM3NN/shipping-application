@@ -15,6 +15,8 @@ import { OverlayDemo } from './overlaydemo';
 import { TreeDemo } from './treedemo';
 import { MenuDemo } from './menudemo';
 import {Dashboard} from "../dashboard/dashboard";
+import {TestComponent} from "./test/test.component";
+import {ProductComponent} from "./product/product.component";
 
 export default [
     { path: 'button', data: { breadcrumb: 'Button' }, component: ButtonDemo },
@@ -33,5 +35,7 @@ export default [
     { path: 'tree', data: { breadcrumb: 'Tree' }, component: TreeDemo },
     { path: 'menu', data: { breadcrumb: 'Menu' }, component: MenuDemo },
     { path: 'dash', data: { breadcrumb: 'Menu' }, component: Dashboard},
+    { path: 'product', component: ProductComponent},
+    { path: 'test',  component: TestComponent},
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

@@ -1,0 +1,17 @@
+.p-dialog .p-grid.p-formgrid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 1.5rem !important;
+    padding: 1rem !important;
+}
+
+.p-dialog .p-grid .p-col-12.p-sm-6.p-md-6 {
+    flex: 1 1 45% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+}
+
+.p-dialog .p-grid .p-col-12 {
+    flex: 0 0 100% !important;
+}

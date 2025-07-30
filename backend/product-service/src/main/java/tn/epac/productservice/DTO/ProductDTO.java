@@ -1,11 +1,16 @@
 package tn.epac.productservice.DTO;
 
+
 import lombok.*;
+import tn.epac.productservice.Entities.Category;
+import tn.epac.productservice.Entities.InventoryStatus;
 
 import java.util.List;
-@Data
-@AllArgsConstructor
+
 @NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 @Builder
 public class ProductDTO {
     private String id;
@@ -17,4 +22,7 @@ public class ProductDTO {
     private int quantity;
     private float price;
     private List<String> inventoryIds;
+    private Category category;
+    private InventoryStatus inventoryStatus;
+    private String imageUrl;
 }

@@ -9,4 +9,6 @@ public interface IproductService {
     ProductDTO getProductById(String id);
     ProductDTO updateProduct(String id, ProductDTO productDTO);
     void deleteProduct(String id);
+
+    void deleteProducts(List<String> ids);
 }

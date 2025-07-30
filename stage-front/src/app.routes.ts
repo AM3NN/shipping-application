@@ -5,22 +5,9 @@ import { Documentation } from './app/pages/documentation/documentation';
 import { Landing } from './app/pages/landing/landing';
 import { Notfound } from './app/pages/notfound/notfound';
 import { AuthGuard } from './auth.guard';
-import { FrontLayout } from './app/pages/frontoffice/front.layout';
-import { frontRoutes } from './app/pages/frontoffice/front.routes';
+
 export const appRoutes: Routes = [
-    // ✅ Redirection par défaut vers Front
-    { path: '', redirectTo: '/front/order-form', pathMatch: 'full' },
-    // Front Office Routes
-
-
-    // ✅ Front Office (NON protégé)
-    {
-        path: 'front',
-        component: FrontLayout,
-        children: frontRoutes
-    },
-
-    // 🔒 Routes protégées par Keycloak
+    { path: '', redirectTo: '/uikit/dash', pathMatch: 'full' },
     {
         path: '',
         component: AppLayout,
@@ -32,6 +19,10 @@ export const appRoutes: Routes = [
             { path: 'pages', loadChildren: () => import('./app/pages/pages.routes') }
         ]
     },
+    { path: 'landing', component: Landing },
+    { path: 'notfound', component: Notfound },
+    { path: 'auth', loadChildren: () => import('./app/pages/auth/auth.routes') },
+    { path: '**', redirectTo: '/notfound' },
 
     { path: 'landing', component: Landing },
     { path: 'notfound', component: Notfound },

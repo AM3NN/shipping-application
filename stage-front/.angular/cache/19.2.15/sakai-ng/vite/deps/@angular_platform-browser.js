@@ -20,6 +20,7 @@ import {
   withIncrementalHydration,
   withNoHttpTransferCache
 } from "./chunk-EXHYTUTQ.js";
+import "./chunk-WXJEMTTQ.js";
 import {
   BrowserDomAdapter,
   BrowserGetTestability,
@@ -31,7 +32,6 @@ import {
   platformBrowser,
   provideProtractorTestingSupport
 } from "./chunk-VMV7YGIN.js";
-import "./chunk-WXJEMTTQ.js";
 import {
   DomRendererFactory2,
   EVENT_MANAGER_PLUGINS,

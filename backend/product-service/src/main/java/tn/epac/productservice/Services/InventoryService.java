@@ -7,6 +7,7 @@ import tn.epac.productservice.Entities.Inventory;
 import tn.epac.productservice.Entities.Product;
 import tn.epac.productservice.Entities.Warehouse;
 import tn.epac.productservice.Exceptions.ResourceNotFoundException;
+import tn.epac.productservice.Mappers.InventoryMapper;
 import tn.epac.productservice.Repositories.InventoryRepository;
 import tn.epac.productservice.Repositories.ProductRepository;
 import tn.epac.productservice.Repositories.WarehouseRepository;
@@ -22,6 +23,7 @@ public class InventoryService implements IInventoryservice {
     private final InventoryRepository inventoryRepository;
     private final ProductRepository productRepository;
     private final WarehouseRepository warehouseRepository;
+    private final InventoryMapper inventoryMapper;
 
     @Override
     public InventoryDTO createInventory(InventoryDTO dto) {

@@ -3,6 +3,7 @@ package tn.epac.productservice.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,23 +27,28 @@ public class ProductServiceSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> {
+                    // Optionnel : tu peux configurer ici ou via un bean CorsConfigurationSource
+                })
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/products/v3/api-docs/**",
-                                "/webjars/**"
-                        ).permitAll().requestMatchers("/api/products").hasRole("ADMIN")  // ⚠️ TEMPORAIRE// ✅ sécurise avec un rôle
+                                "/webjars/**","/uploads/**"
+                        ).permitAll()
+                        .requestMatchers("/api/products").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter())
-                        )
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 );
+
         return http.build();
     }
+
 
     @Bean
     public Converter<Jwt, JwtAuthenticationToken> jwtAuthenticationConverter() {

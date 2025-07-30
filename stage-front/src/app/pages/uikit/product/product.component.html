@@ -1,0 +1,260 @@
+
+
+
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+        <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+    </ng-template>
+</p-toolbar>
+
+<p-table
+    #dt
+    [value]="products()"
+    [rows]="10"
+
+    [paginator]="true"
+    [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [(selection)]="selectedProducts"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[10, 20, 30]"
+>
+    <ng-template #caption>
+        <div class="flex items-center justify-between">
+            <h5 class="m-0">Manage Products</h5>
+            <p-iconfield>
+                <p-inputicon styleClass="pi pi-search" />
+                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+            </p-iconfield>
+        </div>
+    </ng-template>
+    <ng-template #header>
+        <tr>
+            <th style="width: 3rem">
+                <p-tableHeaderCheckbox />
+            </th>
+            <th style="min-width: 16rem">Reference</th>
+            <th pSortableColumn="name" style="min-width:16rem">
+                Name
+                <p-sortIcon field="name" />
+            </th>
+            <th>Image</th>
+            <th pSortableColumn="price" style="min-width: 8rem">
+                Price
+                <p-sortIcon field="price" />
+            </th>
+            <th pSortableColumn="category" style="min-width:10rem">
+                Category
+                <p-sortIcon field="category" />
+            </th>
+            <th pSortableColumn="rating" style="min-width: 12rem">
+               Version
+                <p-sortIcon field="rating" />
+            </th>
+            <th pSortableColumn="inventoryStatus" style="min-width: 12rem">
+                Status
+                <p-sortIcon field="inventoryStatus" />
+            </th>
+            <th style="min-width: 12rem"></th>
+        </tr>
+    </ng-template>
+    <ng-template #body let-product>
+        <tr>
+            <td style="width: 3rem">
+                <p-tableCheckbox [value]="product" />
+            </td>
+            <td style="min-width: 16rem">{{ product.reference }}</td>
+            <td style="min-width: 16rem">{{ product.name }}</td>
+            <td>
+                <img   [src]="'http://localhost:8082' + product.imageUrl" [alt]="product.name" style="width: 64px; height: 64px;" class="rounded" *ngIf="product.imageUrl; else noImage"/>
+                <ng-template #noImage>
+                    <span>-</span>
+                </ng-template>
+            </td>
+            <td style="min-width: 24rem">{{ product.description }}</td>
+            <td style="min-width: 12rem">{{ product.type }}</td>
+            <td style="min-width: 10rem">{{ product.version }}</td>
+            <td style="min-width: 8rem">{{ product.price | currency: 'USD' }}</td>
+            <td style="min-width: 8rem">{{ product.quantity }}</td>
+            <td style="min-width: 12rem">{{ product.category }}</td>
+            <td style="min-width: 12rem">
+                <p-tag [value]="product.inventoryStatus" [severity]="getSeverity(product.inventoryStatus)"></p-tag>
+            </td>
+            <td style="min-width: 12rem">
+                <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(product)" />
+                <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(product)" />
+            </td>
+        </tr>
+    </ng-template>
+
+</p-table>
+<p-dialog
+    [(visible)]="productDialog"
+    [style]="{ width: '60vw', 'min-width': '600px', 'max-width': '600px' }"
+header="Product Details"
+[modal]="true"
+[closable]="false"
+class="p-fluid"
+>
+<ng-template pTemplate="content">
+    <div class="p-grid p-formgrid" style="gap: 1.5rem; padding: 1rem; display: flex; flex-wrap: wrap;">
+        <!-- Image (full width, centered) -->
+        <div class="p-col-12" style="text-align: center; margin-bottom: 1rem;">
+            <img
+                *ngIf="product.imageUrl"
+                ngSrc="product.imageUrl"
+                [alt]="product.name"
+                style="max-width: 200px; max-height: 200px;"
+            />
+        </div>
+
+        <!-- Name and Reference (side by side) -->
+        <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+            <label for="name" class="block font-bold mb-2">Name</label>
+            <input
+                pInputText
+                id="name"
+                [(ngModel)]="product.name"
+                required
+                autofocus
+                class="w-full"
+            />
+            <small class="text-red-500" *ngIf="submitted && !product.name"
+            >Name is required.</small
+            >
+        </div>
+        <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+            <label for="reference" class="block font-bold mb-2">Reference</label>
+            <input
+                pInputText
+                id="reference"
+                [(ngModel)]="product.reference"
+                required
+                class="w-full"
+            />
+            <small class="text-red-500" *ngIf="submitted && !product.reference"
+            >Reference is required.</small
+            >
+        </div>
+
+        <!-- Category and Inventory Status (side by side) -->
+        <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+            <label for="category" class="block font-bold mb-2">Category</label>
+            <p-dropdown
+                id="category"
+                [options]="categories"
+                [(ngModel)]="product.category"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select a category"
+                styleClass="w-full"
+            ></p-dropdown>
+        </div>
+        <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+            <label for="inventoryStatus" class="block font-bold mb-2"
+            >Inventory Status</label
+            >
+            <p-dropdown
+                id="inventoryStatus"
+                [options]="inventoryStatuses"
+                [(ngModel)]="product.inventoryStatus"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select a Status"
+                styleClass="w-full"
+            ></p-dropdown>
+        </div>
+
+        <!-- Type and Version (side by side) -->
+        <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+            <label for="type" class="block font-bold mb-2">Type</label>
+            <input pInputText id="type" [(ngModel)]="product.type" class="w-full" />
+        </div>
+        <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+            <label for="version" class="block font-bold mb-2">Version</label>
+            <input
+                pInputText
+                id="version"
+                [(ngModel)]="product.version"
+                class="w-full"
+            />
+        </div>
+
+        <!-- Price and Quantity (side by side) -->
+        <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+            <label  class="block font-bold mb-2">Price</label>
+            <p-inputNumber
+                id="price"
+                [(ngModel)]="product.price"
+                mode="currency"
+                currency="USD"
+                locale="en-US"
+                styleClass="w-full"
+            ></p-inputNumber>
+        </div>
+        <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+            <label  class="block font-bold mb-2">Quantity</label>
+            <p-inputNumber
+                id="quantity"
+                [(ngModel)]="product.quantity"
+                styleClass="w-full"
+            ></p-inputNumber>
+        </div>
+
+        <!-- Description (full width) -->
+        <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+            <label for="description" class="block font-bold mb-2">Description</label>
+            <textarea
+                pTextarea
+                id="description"
+                [(ngModel)]="product.description"
+                rows="4"
+                class="w-full"
+            ></textarea>
+        </div>
+
+        <!-- Image URL (full width) -->
+        <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+            <label class="block font-bold mb-2">Upload Image</label>
+            <p-fileUpload
+                name="image"
+                mode="basic"
+                accept="image/*"
+                [auto]="true"
+                (onSelect)="onImageSelect($event)"
+                [maxFileSize]="1000000"
+                chooseLabel="Choisir Image"
+                class="w-full"
+            />
+        </div>
+    </div>
+</ng-template>
+
+<ng-template pTemplate="footer">
+    <p-button
+        label="Cancel"
+        icon="pi pi-times"
+        text
+        (click)="hideDialog()"
+    ></p-button>
+    <p-button
+        label="Save"
+        icon="pi pi-check"
+        (click)="saveProductt()"
+    ></p-button>
+</ng-template>
+</p-dialog>
+
+
+
+
+<p-confirmdialog [style]="{ width: '450px' }"></p-confirmdialog>
+

@@ -1,4 +1,5 @@
 package tn.epac.productservice.Mappers;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import tn.epac.productservice.DTO.InventoryDTO;
@@ -11,11 +12,7 @@ import java.util.stream.Collectors;
 public class InventoryMapper {
 
     private final ModelMapper modelMapper = new ModelMapper();
-    private final InventoryMapper inventoryMapper;
 
-    public InventoryMapper(InventoryMapper inventoryMapper) {
-        this.inventoryMapper = inventoryMapper;
-    }
 
     public InventoryDTO toInventoryDTO(Inventory inventory) {
         return modelMapper.map(inventory, InventoryDTO.class);
@@ -25,5 +22,9 @@ public class InventoryMapper {
         return modelMapper.map(inventoryDTO, Inventory.class);
     }
 
-
+    public List<InventoryDTO> toDTOList(List<Inventory> inventories) {
+        return inventories.stream()
+                .map(this::toInventoryDTO)
+                .collect(Collectors.toList());
+    }
 }

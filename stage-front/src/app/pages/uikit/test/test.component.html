@@ -1,0 +1,20 @@
+<div class="p-fluid">
+    <div class="p-field">
+        <label >Entrez votre question à l'agent :</label>
+        <textarea
+            pInputTextarea
+            [(ngModel)]="userQuery"
+            rows="3"
+            autoResize="true"
+            placeholder="Posez votre question ici..."
+        ></textarea>
+    </div>
+    <button pButton type="button" label="Envoyer" (click)="askAgent()"></button>
+</div>
+
+<p *ngIf="loading">Chargement...</p>
+
+<div class="p-card mt-3" *ngIf="agentResponse">
+    <p><strong>Réponse de l'IA :</strong></p>
+    <pre>{{ agentResponse }}</pre>
+</div>

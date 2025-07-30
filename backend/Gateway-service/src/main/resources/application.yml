@@ -7,52 +7,70 @@ spring:
 
   main:
     web-application-type: reactive
+
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8080/realms/test
+
   cloud:
     config:
       enabled: false
     gateway:
-      routes:
-        - id: order-service
-          uri: lb://ORDER-SERVICE
-          predicates:
-            - Path=/orders/**
-        - id: user-service
-          uri: lb://USER-SERVICE
-          predicates:
-            - Path=/user-service/**
-        - id: product-service
-          uri: lb://PRODUCT-SERVICE
-          predicates:
-            - Path=/product-service/**
-          filters:
-            - StripPrefix=1
-        - id: shipping-service
-          uri: lb://SHIPPING-SERVICE
-          predicates:
-          - Path=/shipping-service/**
-        - id: product-service-swagger
-          uri: lb://PRODUCT-SERVICE
-          predicates:
-            - Path=/products/v3/api-docs
-        - id: user-service-swagger
-          uri: lb://USER-SERVICE
-          predicates:
-            - Path=/user/v3/api-docs
-        - id: shipping-service-swagger
-          uri: lb://SHIPPING-SERVICE
-          predicates:
-            - Path=/shipping/v3/api-docs
       server:
         webflux:
+          routes:
+            - id: order-service
+              uri: lb://ORDER-SERVICE
+              predicates:
+                - Path=/orders/**
+            - id: user-service
+              uri: lb://USER-SERVICE
+              predicates:
+                - Path=/user-service/**
+            - id: product-service
+              uri: lb://PRODUCT-SERVICE
+              predicates:
+                - Path=/product-service/**
+            - id: shipping-service
+              uri: lb://SHIPPING-SERVICE
+              predicates:
+                - Path=/shipping-service/**
+            - id: product-service-swagger
+              uri: lb://PRODUCT-SERVICE
+              predicates:
+                - Path=/products/v3/api-docs
+            - id: user-service-swagger
+              uri: lb://USER-SERVICE
+              predicates:
+                - Path=/user/v3/api-docs
+            - id: shipping-service-swagger
+              uri: lb://SHIPPING-SERVICE
+              predicates:
+                - Path=/shipping/v3/api-docs
           discovery:
             locator:
-              lower-case-service-id: true
               enabled: false
+              lower-case-service-id: true
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowed-origins: "http://localhost:4200"
+                allowed-methods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - OPTIONS
+                allowed-headers:
+                  - Authorization
+                  - Content-Type
+                  - Accept
+                  - Origin
+                  - X-Requested-With
+                allow-credentials: true
+                max-age: 3600
 
 springdoc:
   swagger-ui:
@@ -67,7 +85,6 @@ springdoc:
         url: /products/v3/api-docs
       - name: shipping-service
         url: /shipping/v3/api-docs
-
   api-docs:
     path: /v3/api-docs
   show-actuator: true
@@ -78,11 +95,20 @@ eureka:
       defaultZone: http://localhost:8761/eureka
   instance:
     prefer-ip-address: true
+
 logging:
   level:
-    org.springframework.security: DEBUG
-    org.springframework.cloud.gateway: DEBUG
-    reactor.netty: DEBUG
+    root: INFO
+    reactor.netty: WARN
+    io.netty: WARN
+    org.springframework.web.server.adapter.HttpWebHandlerAdapter: WARN
+    org.springframework.web.reactive: WARN
+    tn.epac.Gateway_service.Config: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
+  file:
+    name: logs/app.log   # Chemin relatif au dossier racine de ton projet
+
 app:
   swagger:
-       gateway-mode: true
+    gateway-mode: true

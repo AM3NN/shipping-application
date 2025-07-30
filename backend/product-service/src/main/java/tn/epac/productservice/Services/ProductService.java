@@ -1,7 +1,6 @@
 package tn.epac.productservice.Services;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tn.epac.productservice.DTO.ProductDTO;
@@ -19,13 +18,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductService implements IproductService {
 
-    private  ProductRepository productRepository;
-    private  ProductMapper productMapper;
-
-    public ProductService(ProductRepository productRepository, ProductMapper productMapper) {
-        this.productRepository = productRepository;
-        this.productMapper = productMapper;
-    }
+    private  final ProductRepository productRepository;
+    private final ProductMapper productMapper;
 
     @Override
     public ProductDTO createProduct(ProductDTO productDTO) {
@@ -87,4 +81,19 @@ public class ProductService implements IproductService {
         }
         productRepository.deleteById(id);
     }
+
+    @Override
+    public void deleteProducts(List<String> ids) {
+        // Vérifie que chaque produit existe avant suppression (optionnel)
+        List<String> notFoundIds = ids.stream()
+                .filter(id -> !productRepository.existsById(id))
+                .collect(Collectors.toList());
+        if (!notFoundIds.isEmpty()) {
+            throw new ProductNotFoundException("Produits introuvables avec les IDs : " + notFoundIds);
+        }
+
+        // Supprime tous les produits dont les ids sont dans la liste
+        productRepository.deleteAllById(ids);
+    }
+
 }

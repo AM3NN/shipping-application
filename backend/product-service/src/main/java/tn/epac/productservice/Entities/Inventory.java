@@ -13,6 +13,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Inventory {
     @Id
     private String id;
+    private String name;         // Ex: "Stock Entrepôt Nord"
+    private String reference;    // Ex: "INV-2025-NORD-001"
     private int reservedQuantity;
     private int availableQuantity;
     private String warehouseId; // Référence à Warehouse

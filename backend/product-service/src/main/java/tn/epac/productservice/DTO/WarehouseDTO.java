@@ -9,8 +9,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WarehouseDTO {
+    private String id;
     private String name;
     private String location;
+    private String country;
     private int capacity;
     private List<String> inventoryIds; // liste d'IDs d'inventaires
 }

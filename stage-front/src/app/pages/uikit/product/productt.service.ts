@@ -31,6 +31,7 @@ export interface Product {
 }
 
 
+
 @Injectable()
 export class ProducttService {
     private apiUrl = 'http://localhost:8888/product-service/api/products';

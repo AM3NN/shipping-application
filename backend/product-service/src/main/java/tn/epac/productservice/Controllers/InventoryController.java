@@ -1,9 +1,12 @@
 package tn.epac.productservice.Controllers;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tn.epac.productservice.DTO.InventoryDTO;
+import tn.epac.productservice.DTO.InventoryWithProductDTO;
+import tn.epac.productservice.DTO.InventoryWithWarehouseDTO;
 import tn.epac.productservice.Entities.Inventory;
 import tn.epac.productservice.Services.IInventoryservice;
 
@@ -72,7 +75,21 @@ public class InventoryController {
     }
 
     @GetMapping("/product/{productId}")
-    public ResponseEntity<List<InventoryDTO>> getByProduct(@PathVariable String productId) {
+    public ResponseEntity<List<InventoryWithWarehouseDTO>> getByProduct(@PathVariable String productId) {
         return ResponseEntity.ok(inventoryService.getInventoriesByProduct(productId));
     }
+    @PostMapping("/assign/{productId}/{warehouseId}")
+    public ResponseEntity<InventoryDTO> createAndAssignInventory(
+            @PathVariable String productId,
+            @PathVariable String warehouseId,
+            @RequestBody Inventory inventory) {
+
+        InventoryDTO savedInventory = inventoryService.createAndAssignInventoryToProduct(inventory, productId, warehouseId);
+        return new ResponseEntity<>(savedInventory, HttpStatus.CREATED);
+    }
+    @GetMapping("/without-warehouse")
+    public List<InventoryWithProductDTO> getInventoriesWithoutWarehouse() {
+        return inventoryService.getInventoriesWithoutWarehouse();
+    }
+
 }

@@ -8,7 +8,7 @@ import {DropdownModule} from "primeng/dropdown";
 import {RadioButton} from "primeng/radiobutton";
 import {Dialog} from "primeng/dialog";
 import {InputText} from "primeng/inputtext";
-import {CurrencyPipe, NgForOf, NgIf} from "@angular/common";
+import {CommonModule, CurrencyPipe, NgForOf, NgIf} from "@angular/common";
 import {Textarea} from "primeng/textarea";
 import {ConfirmDialog} from "primeng/confirmdialog";
 import {IconField} from "primeng/iconfield";
@@ -18,6 +18,10 @@ import {Tag} from "primeng/tag";
 import {Toolbar} from "primeng/toolbar";
 import {Product, ProducttService} from "./productt.service";
 import {FileUpload} from "primeng/fileupload";
+import { WarehouseService} from "../warehouse/warehouse.service";
+import {InventoryService} from "./inventory.service";
+import {Inventory, InventoryWithWarehouseDTO} from "./inventory.model";
+import {Country} from "../../service/customer.service";
 
 @Component({
     selector: 'app-product',
@@ -41,8 +45,10 @@ import {FileUpload} from "primeng/fileupload";
         Tag,
         Toolbar,
         FileUpload,
+        CommonModule
+
         /* tes modules ici */],
-    providers: [MessageService, ProducttService, ConfirmationService]
+    providers: [MessageService, ProducttService, ConfirmationService,InventoryService,WarehouseService]
 })
 export class ProductComponent implements OnInit {
     categories = [
@@ -62,6 +68,12 @@ export class ProductComponent implements OnInit {
         { label: 'Dictionary', value: 'DICTIONARY' },
         { label: 'Encyclopedia', value: 'ENCYCLOPEDIA' }
     ];
+    countries :Country[] = [
+        { name: 'United States', code: 'us' },
+        { name: 'France', code: 'fr' },
+        { name: 'Germany', code: 'de' },
+        { name: 'Tunisia', code: 'tn' }
+    ];
 
     inventoryStatuses = [
         { label: 'In Stock', value: 'INSTOCK' },
@@ -77,16 +89,39 @@ export class ProductComponent implements OnInit {
     selectedProducts: Product[] = [];
     submitted = false;
     statuses!: any[];
+    imageUrl: string | null = null;
+    selectedProductInventories: InventoryWithWarehouseDTO[] = [];
+    warehouses: { id: string, name: string }[] = [];
+    addInventoryDialogVisible = false;
+    viewInventoriesDialogVisible = false;
+
+    selectedProduct: Product | null = null;
+
+    newInventory: { reservedQuantity: number; availableQuantity: number; warehouseId: string } = {
+        reservedQuantity: 0,
+        availableQuantity: 0,
+        warehouseId: ''// si nécessaire
+    };
     @ViewChild('dt') dt!: Table;
 
     constructor(
         private productService: ProducttService,
+        private warehouseService: WarehouseService,
+        private inventoryService: InventoryService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService
     ) {}
 
     ngOnInit() {
         this.loadDemoData();
+        this.loadWarehouses();
+    }
+
+    loadWarehouses() {
+        this.warehouseService.getAll().subscribe({
+            next: (data) => this.warehouses = data,
+            error: (err) => console.error('Erreur lors du chargement des entrepôts :', err)
+        });
     }
 
     loadDemoData() {
@@ -289,42 +324,102 @@ export class ProductComponent implements OnInit {
         this.product = { ...product };
         this.productDialog = true;
     }
-    onImageUpload(event: any) {
-        const file = event.files[0];
-        if (file) {
-            if (file.size > 1000000) {
-                this.imageError = true;
-                this.previewImage = null;
-                return;
-            }
-            this.imageError = false;
-            this.selectedImageFile = file;
 
-            const reader = new FileReader();
-            reader.onload = (e) => (this.previewImage = e.target?.result);
-            reader.readAsDataURL(file);
-        }
-    }
-    onImageSelect(event: any) {
-        const file = event.originalEvent?.target?.files?.[0];
+
+    onUpload(event: any) {
+        const file = event.files?.[0]; // ✅ Récupère l’image
 
         if (file) {
             if (file.size > 1000000) {
                 this.imageError = true;
                 this.previewImage = null;
+                this.selectedImageFile = undefined;
                 return;
             }
 
             this.imageError = false;
             this.selectedImageFile = file;
+            this.imageUrl = URL.createObjectURL(file); // aperçu visuel
 
             const reader = new FileReader();
             reader.onload = (e) => (this.previewImage = e.target?.result);
             reader.readAsDataURL(file);
         }
+
+        // Nettoie la file d'attente d'upload PrimeNG
+        event.options?.clear?.();
+    }
+    openAddInventoryDialog(product: any) {
+        this.selectedProduct = product;
+        this.newInventory = {
+            reservedQuantity: 0,
+            availableQuantity: 0,
+            warehouseId: ''
+        };
+        this.addInventoryDialogVisible = true;
     }
 
 
+    saveNewInventory() {
+        if (!this.selectedProduct || !this.selectedProduct.id) {
+            console.error("Produit non sélectionné ou ID manquant.");
+            return;
+        }
 
+        if (!this.newInventory.warehouseId) {
+            console.error("Entrepôt non sélectionné.");
+            return;
+        }
+
+        this.inventoryService.createAndAssignInventoryToProduct(
+            this.newInventory,
+            this.selectedProduct.id!,
+            this.newInventory.warehouseId  // ← c’est bien un string
+        ).subscribe({
+            next: res => {
+                this.addInventoryDialogVisible = false;
+                this.loadDemoData();
+            },
+            error: err => console.error(err)
+        });
+    }
+
+    openViewInventoriesDialog(product: Product): void {
+        if (!product?.id) {
+            console.error('Produit sans ID');
+            return;
+        }
+
+        this.inventoryService.getInventoriesByProductId(product.id).subscribe({
+            next: (inventories) => {
+                this.selectedProductInventories = inventories;
+                this.viewInventoriesDialogVisible = true;
+            },
+            error: (err) => {
+                console.error('Erreur chargement inventaires :', err);
+                this.selectedProductInventories = [];
+                this.viewInventoriesDialogVisible = true; // Affiche modal vide quand même
+            }
+        });
+    }
+    calculateTotalAvailable(warehouseName: string | undefined): number {
+        if (!warehouseName) return 0;
+        return this.selectedProductInventories
+            .filter(inv => inv.warehouse?.name === warehouseName)
+            .reduce((sum, inv) => sum + (inv.inventory.availableQuantity ?? 0), 0);
+    }
+
+    calculateTotalReserved(warehouseName: string | undefined): number {
+        if (!warehouseName) return 0;
+        return this.selectedProductInventories
+            .filter(inv => inv.warehouse?.name === warehouseName)
+            .reduce((sum, inv) => sum + (inv.inventory.reservedQuantity ?? 0), 0);
+    }
+
+
+    getCountryCode(countryName: string): string | undefined {
+        const country = this.countries.find(c => c.name && c.name.toLowerCase() === countryName.toLowerCase());
+        return country ? country.code : undefined;
+    }
 
 }

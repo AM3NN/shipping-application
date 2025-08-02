@@ -50,7 +50,7 @@ class InventoryControllerTest {
                 .build();
 
         // Création d’un exemple de DTO d’inventaire à utiliser dans les tests
-        sampleInventoryDTO = new InventoryDTO("1", 5, 10, "W1", "P1");
+        sampleInventoryDTO = new InventoryDTO("1","aa","ee", 5, 10, "W1", "P1");
     }
 
     @Test

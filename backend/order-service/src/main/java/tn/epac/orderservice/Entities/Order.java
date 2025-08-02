@@ -42,6 +42,7 @@ public class Order {
     private String taxCurrency;
     private BigDecimal totalAmount;
     private String totalCurrency;
-
+    OrderDetail details;    // Contient les attributs personnalisés
+    String productId;
 
 }

@@ -17,6 +17,7 @@ import { MenuDemo } from './menudemo';
 import {Dashboard} from "../dashboard/dashboard";
 import {TestComponent} from "./test/test.component";
 import {ProductComponent} from "./product/product.component";
+import {WarehouseComponent} from "./warehouse/warehouse.component";
 
 export default [
     { path: 'button', data: { breadcrumb: 'Button' }, component: ButtonDemo },
@@ -36,6 +37,7 @@ export default [
     { path: 'menu', data: { breadcrumb: 'Menu' }, component: MenuDemo },
     { path: 'dash', data: { breadcrumb: 'Menu' }, component: Dashboard},
     { path: 'product', component: ProductComponent},
+    { path: 'warehouse', component: WarehouseComponent},
     { path: 'test',  component: TestComponent},
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

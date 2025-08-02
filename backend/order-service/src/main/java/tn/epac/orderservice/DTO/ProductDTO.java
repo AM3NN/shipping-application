@@ -1,11 +1,11 @@
-package tn.epac.productservice.DTO;
+package tn.epac.orderservice.DTO;
 
 
 import lombok.*;
-import tn.epac.productservice.Entities.Category;
-import tn.epac.productservice.Entities.InventoryStatus;
+import tn.epac.orderservice.Entities.Category;
+import tn.epac.orderservice.Entities.InventoryStatus;
 
-import java.io.Serializable;
+
 import java.util.List;
 
 @NoArgsConstructor
@@ -13,7 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-public class ProductDTO implements Serializable {
+public class ProductDTO {
     private String id;
     private String name;
     private String reference;
@@ -26,7 +26,5 @@ public class ProductDTO implements Serializable {
     private Category category;
     private InventoryStatus inventoryStatus;
     private String imageUrl;
-    public ProductDTO(String id) {
-        this.id = id;
-    }
+
 }

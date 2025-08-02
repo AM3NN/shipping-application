@@ -34,8 +34,8 @@ public class InventoryServiceTest {
 
     @Test
     void testCreateInventory() {
-        InventoryDTO dto = new InventoryDTO(null, 3, 5, "WH1", "PR1");
-        Inventory inv = new Inventory(null, 3, 5, "WH1", "PR1");
+        InventoryDTO dto = new InventoryDTO(null,"aa","bb", 3, 5, "WH1", "PR1");
+        Inventory inv = new Inventory(null,"aa","bb", 3, 5, "WH1", "PR1");
 
         when(inventoryRepository.save(any(Inventory.class))).thenReturn(inv);
 

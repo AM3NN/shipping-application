@@ -15,6 +15,7 @@ public class Warehouse {
     private String id;
     private String name;
     private String location;
+    private String country;
     private int capacity;
     private List<Inventory> inventories; // Références aux inventaires
 

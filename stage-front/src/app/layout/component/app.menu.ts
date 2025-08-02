@@ -23,7 +23,8 @@ export class AppMenu {
             {
                 label: 'Home',
                 items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
-                    { label: 'Products', icon: 'pi pi-book', routerLink: ['/uikit/product'] }]
+                    { label: 'Products', icon: 'pi pi-book', routerLink: ['/uikit/product'] },
+                    { label: 'Warehouses', icon: 'pi pi-building', routerLink: ['/uikit/warehouse'] }]
             },
             {
                 label: 'UI Components',

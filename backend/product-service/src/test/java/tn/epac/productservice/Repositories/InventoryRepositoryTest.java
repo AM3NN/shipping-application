@@ -18,7 +18,7 @@ public class InventoryRepositoryTest {
 
     @Test
     void testSaveAndFindByWarehouseId() {
-        Inventory inv = new Inventory(null, 5, 10, "WH1", "PR1");
+        Inventory inv = new Inventory(null,"aa","dd", 5, 10, "WH1", "PR1");
         inventoryRepository.save(inv);
 
         List<Inventory> found = inventoryRepository.findByWarehouseId("WH1");
@@ -28,7 +28,7 @@ public class InventoryRepositoryTest {
 
     @Test
     void testFindByProductId() {
-        Inventory inv = new Inventory(null, 2, 8, "WH2", "PR2");
+        Inventory inv = new Inventory(null,"aa","d", 2, 8, "WH2", "PR2");
         inventoryRepository.save(inv);
 
         List<Inventory> result = inventoryRepository.findByProductId("PR2");

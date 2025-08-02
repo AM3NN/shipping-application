@@ -9,6 +9,8 @@ import tn.epac.productservice.DTO.WarehouseDTO;
 import tn.epac.productservice.Services.IwarehouseService;
 
 import java.util.List;
+import java.util.Map;
+
 @SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/warehouses")
@@ -47,4 +49,13 @@ public class WareHouseController {
         warehouseService.deleteWarehouse(id);
         return ResponseEntity.noContent().build();
     }
+    @PostMapping("/{warehouseId}/assign-inventories")
+    public ResponseEntity<Map<String, String>> assignInventories(
+            @PathVariable String warehouseId,
+            @RequestBody List<String> inventoryIds) {
+
+        Map<String, String> result = warehouseService.assignInventoriesToWarehouse(warehouseId, inventoryIds);
+        return ResponseEntity.ok(result);
+    }
+
 }

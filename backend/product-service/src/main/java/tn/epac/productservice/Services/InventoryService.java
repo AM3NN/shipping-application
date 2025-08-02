@@ -3,6 +3,8 @@ package tn.epac.productservice.Services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tn.epac.productservice.DTO.InventoryDTO;
+import tn.epac.productservice.DTO.InventoryWithProductDTO;
+import tn.epac.productservice.DTO.InventoryWithWarehouseDTO;
 import tn.epac.productservice.Entities.Inventory;
 import tn.epac.productservice.Entities.Product;
 import tn.epac.productservice.Entities.Warehouse;
@@ -27,7 +29,7 @@ public class InventoryService implements IInventoryservice {
 
     @Override
     public InventoryDTO createInventory(InventoryDTO dto) {
-        Inventory inventory = new Inventory(null, dto.getReservedQuantity(), dto.getAvailableQuantity(), dto.getWarehouseId(), dto.getProductId());
+        Inventory inventory = new Inventory(null,dto.getName(), dto.getReference(), dto.getReservedQuantity(), dto.getAvailableQuantity(), dto.getWarehouseId(), dto.getProductId());
         return mapToDTO(inventoryRepository.save(inventory));
     }
 
@@ -67,6 +69,8 @@ public class InventoryService implements IInventoryservice {
     private InventoryDTO mapToDTO(Inventory inv) {
         return new InventoryDTO(
                 inv.getId(),
+                inv.getName(),
+                inv.getReference(),
                 inv.getReservedQuantity(),
                 inv.getAvailableQuantity(),
                 inv.getWarehouseId(),
@@ -119,10 +123,62 @@ public class InventoryService implements IInventoryservice {
                 .collect(Collectors.toList());
     }
 
+
+
     @Override
-    public List<InventoryDTO> getInventoriesByProduct(String productId) {
+    public InventoryDTO createAndAssignInventoryToProduct(Inventory inventory, String productId, String warehouseId) {
+        // Vérifier que le produit existe
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found with ID: " + productId));
+
+        // Définir le productId dans l'inventaire
+        inventory.setProductId(productId);
+        inventory.setWarehouseId(warehouseId);
+        // Sauvegarder l'inventaire
+        Inventory savedInventory = inventoryRepository.save(inventory);
+
+        // Ajouter l'ID de l'inventaire à la liste du produit
+        List<String> inventoryIds = product.getInventoryIds();
+        if (inventoryIds == null) {
+            inventoryIds = new ArrayList<>();
+        }
+        inventoryIds.add(savedInventory.getId());
+        product.setInventoryIds(inventoryIds);
+
+        // Sauvegarder le produit mis à jour
+        productRepository.save(product);
+
+        return mapToDTO(savedInventory);
+    }
+
+    @Override
+    public List<InventoryWithWarehouseDTO> getInventoriesByProduct(String productId) {
         return inventoryRepository.findByProductId(productId).stream()
-                .map(this::mapToDTO)
+                .map(this::mapToDTOO)
                 .collect(Collectors.toList());
+    }
+
+    private InventoryWithWarehouseDTO mapToDTOO(Inventory inventory) {
+        Warehouse warehouse = null;
+        if (inventory.getWarehouseId() != null) {
+            warehouse = warehouseRepository.findById(inventory.getWarehouseId()).orElse(null);
+        }
+        return new InventoryWithWarehouseDTO(inventory, warehouse);
+    }
+
+     @Override
+     public List<InventoryWithProductDTO> getInventoriesWithoutWarehouse() {
+        List<Inventory> inventories = inventoryRepository.findByWarehouseIdIsNullOrWarehouseId("");
+        List<InventoryWithProductDTO> result = new ArrayList<>();
+
+        for (Inventory inventory : inventories) {
+            Product product = null;
+            if (inventory.getProductId() != null && !inventory.getProductId().isEmpty()) {
+                product = productRepository.findById(inventory.getProductId()).orElse(null);
+            }
+            result.add(new InventoryWithProductDTO(inventory, product));
+        }
+
+        return result;
     }
 }

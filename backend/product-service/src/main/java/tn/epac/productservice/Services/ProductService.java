@@ -18,17 +18,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductService implements IproductService {
 
-    private  final ProductRepository productRepository;
+    private final ProductRepository productRepository;
     private final ProductMapper productMapper;
+    private final ProductEventPublisher productEventPublisher; // ← injection
 
     @Override
     public ProductDTO createProduct(ProductDTO productDTO) {
-        // Vérifier s'il existe déjà un produit avec le même ID
         if (productDTO.getId() != null && productRepository.existsById(productDTO.getId())) {
             throw new ProductAlreadyExistsException("Un produit avec l'ID " + productDTO.getId() + " existe déjà.");
         }
 
-        // Vérifier doublons par nom ou référence (ajustez selon votre besoin)
         Optional<Product> existing = productRepository.findAll().stream()
                 .filter(p -> p.getName().equalsIgnoreCase(productDTO.getName()) &&
                         p.getReference().equalsIgnoreCase(productDTO.getReference()))
@@ -39,7 +38,43 @@ public class ProductService implements IproductService {
         }
 
         Product product = productMapper.toProduct(productDTO);
-        return productMapper.toProductDTO(productRepository.save(product));
+        Product saved = productRepository.save(product);
+        ProductDTO savedDTO = productMapper.toProductDTO(saved);
+
+        productEventPublisher.publishProductCreated(savedDTO); // ← ici
+
+        return savedDTO;
+    }
+
+    @Override
+    public ProductDTO updateProduct(String id, ProductDTO productDTO) {
+        Product existing = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Impossible de mettre à jour : produit introuvable avec l'ID : " + id));
+
+        existing.setName(productDTO.getName());
+        existing.setReference(productDTO.getReference());
+        existing.setDescription(productDTO.getDescription());
+        existing.setType(productDTO.getType());
+        existing.setVersion(productDTO.getVersion());
+        existing.setQuantity(productDTO.getQuantity());
+        existing.setPrice(productDTO.getPrice());
+        existing.setInventoryIds(productDTO.getInventoryIds());
+
+        Product updated = productRepository.save(existing);
+        ProductDTO updatedDTO = productMapper.toProductDTO(updated);
+
+        productEventPublisher.publishProductUpdated(updatedDTO); // ← ici
+
+        return updatedDTO;
+    }
+
+    @Override
+    public void deleteProduct(String id) {
+        if (!productRepository.existsById(id)) {
+            throw new ProductNotFoundException("Impossible de supprimer : produit introuvable avec l'ID : " + id);
+        }
+        productRepository.deleteById(id);
+        productEventPublisher.publishProductDeleted(id); // ← ici
     }
 
     @Override
@@ -58,33 +93,7 @@ public class ProductService implements IproductService {
     }
 
     @Override
-    public ProductDTO updateProduct(String id, ProductDTO productDTO) {
-        Product existing = productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Impossible de mettre à jour : produit introuvable avec l'ID : " + id));
-
-        existing.setName(productDTO.getName());
-        existing.setReference(productDTO.getReference());
-        existing.setDescription(productDTO.getDescription());
-        existing.setType(productDTO.getType());
-        existing.setVersion(productDTO.getVersion());
-        existing.setQuantity(productDTO.getQuantity());
-        existing.setPrice(productDTO.getPrice());
-        existing.setInventoryIds(productDTO.getInventoryIds());
-
-        return productMapper.toProductDTO(productRepository.save(existing));
-    }
-
-    @Override
-    public void deleteProduct(String id) {
-        if (!productRepository.existsById(id)) {
-            throw new ProductNotFoundException("Impossible de supprimer : produit introuvable avec l'ID : " + id);
-        }
-        productRepository.deleteById(id);
-    }
-
-    @Override
     public void deleteProducts(List<String> ids) {
-        // Vérifie que chaque produit existe avant suppression (optionnel)
         List<String> notFoundIds = ids.stream()
                 .filter(id -> !productRepository.existsById(id))
                 .collect(Collectors.toList());
@@ -92,8 +101,9 @@ public class ProductService implements IproductService {
             throw new ProductNotFoundException("Produits introuvables avec les IDs : " + notFoundIds);
         }
 
-        // Supprime tous les produits dont les ids sont dans la liste
         productRepository.deleteAllById(ids);
-    }
 
+        // Tu peux publier les événements ici aussi, un par un si besoin
+        ids.forEach(productEventPublisher::publishProductDeleted);
+    }
 }

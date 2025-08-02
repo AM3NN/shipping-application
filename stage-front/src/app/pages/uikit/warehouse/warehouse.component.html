@@ -1,0 +1,329 @@
+<p-toolbar styleClass="mb-6">
+    <ng-template pTemplate="start">
+        <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+        <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedWarehouses()" [disabled]="!selectedWarehouses || !selectedWarehouses.length" />
+    </ng-template>
+    <ng-template pTemplate="end">
+        <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+    </ng-template>
+</p-toolbar>
+
+<div class="card">
+    <div class="font-semibold text-xl mb-4">Manage Warehouses</div>
+    <p-table
+        #dt1
+        [value]="warehouses"
+        dataKey="id"
+        [rows]="10"
+        [loading]="loading"
+        [rowHover]="true"
+        [showGridlines]="true"
+        [paginator]="true"
+        [globalFilterFields]="['name', 'location', 'country', 'capacity']"
+        responsiveLayout="scroll"
+        [(selection)]="selectedWarehouses"
+    >
+        <ng-template pTemplate="caption">
+            <div class="flex justify-between items-center flex-column sm:flex-row">
+                <button pButton label="Clear" class="p-button-outlined mb-2" icon="pi pi-filter-slash" (click)="clear(dt1)"></button>
+                <p-iconfield iconPosition="left" class="ml-auto">
+                    <p-inputicon>
+                        <i class="pi pi-search"></i>
+                    </p-inputicon>
+                    <input pInputText type="text" (input)="onGlobalFilter(dt1, $event)" placeholder="Search keyword" />
+                </p-iconfield>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th style="width: 3rem">
+                    <p-tableHeaderCheckbox />
+                </th>
+                <th style="min-width: 12rem">
+                    <div class="flex justify-between items-center">
+                        Name
+                        <p-columnFilter type="text" field="name" display="menu" placeholder="Search by name"></p-columnFilter>
+                    </div>
+                </th>
+                <th style="min-width: 12rem">
+                    <div class="flex justify-between items-center">
+                        Location
+                        <p-columnFilter type="text" field="location" display="menu" placeholder="Search by location"></p-columnFilter>
+                    </div>
+                </th>
+                <th style="min-width: 12rem">
+                    <div class="flex justify-between items-center">
+                        Country
+                        <p-columnFilter type="text" field="country" display="menu" placeholder="Search by country"></p-columnFilter>
+                    </div>
+                </th>
+                <th style="min-width: 10rem">
+                    <div class="flex justify-between items-center">
+                        Capacity
+                        <p-columnFilter type="numeric" field="capacity" display="menu"></p-columnFilter>
+                    </div>
+                </th>
+                <th style="min-width: 12rem">Actions</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-warehouse>
+            <tr>
+                <td style="width: 3rem">
+                    <p-tableCheckbox [value]="warehouse" />
+                </td>
+                <td>{{ warehouse.name }}</td>
+                <td>{{ warehouse.location }}</td>
+                <td>
+                    <div class="flex items-center gap-2" *ngIf="getCountryCode(warehouse.country) as code">
+
+                        <img src="https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png" [class]="'flag flag-' + code" style="width: 20px" />   <span>{{ warehouse.country }}</span>
+                    </div>
+
+                </td>
+
+
+
+
+                <td>{{ warehouse.capacity }}</td>
+                <td>
+                    <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true"
+                              (click)="editWarehouse(warehouse)" />
+
+                    <p-button icon="pi pi-trash" severity="danger" class="mr-2" [rounded]="true" [outlined]="true"
+                              (click)="deleteWarehouse(warehouse)" />
+
+                    <p-button label="View Inventories" icon="pi pi-eye" class="mr-2" severity="info"
+                              [rounded]="true" [outlined]="true"
+                              (click)="viewInventories(warehouse)" />
+
+                    <p-button label="Add Inventories" icon="pi pi-plus" severity="success"
+                              [rounded]="true" [outlined]="true"
+                              (click)="addInventories(warehouse)" />
+                </td>
+
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="6">No warehouses found.</td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="loadingbody">
+            <tr>
+                <td colspan="6">Loading warehouses data. Please wait.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<p-dialog
+    [(visible)]="warehouseDialog"
+    [style]="{ width: '60vw', 'min-width': '600px', 'max-width': '600px' }"
+    header="Warehouse Details"
+    [modal]="true"
+    [closable]="false"
+    class="p-fluid"
+>
+    <ng-template pTemplate="content">
+        <div class="p-grid p-formgrid" style="gap: 1.5rem; padding: 1rem; display: flex; flex-wrap: wrap;">
+            <!-- Name and Location -->
+            <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+                <label  class="block font-bold mb-2">Name</label>
+                <input
+                    pInputText
+
+                    [(ngModel)]="warehouse.name"
+                    required
+                    autofocus
+                    class="w-full"
+                />
+                <small class="text-red-500" *ngIf="submitted && !warehouse.name">Name is required.</small>
+            </div>
+            <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+                <label  class="block font-bold mb-2">Location</label>
+                <input
+                    pInputText
+                    id="location"
+                    [(ngModel)]="warehouse.location"
+                    required
+                    class="w-full"
+                />
+                <small class="text-red-500" *ngIf="submitted && !warehouse.location">Location is required.</small>
+            </div>
+
+            <!-- Country and Capacity -->
+            <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+                <label  class="block font-bold mb-2">Country</label>
+                <p-dropdown
+                    id="country"
+                    [options]="countries"
+                    [(ngModel)]="warehouse.country"
+                    optionLabel="name"
+                    optionValue="name"
+                    placeholder="Select a country"
+                    styleClass="w-full"
+                ></p-dropdown>
+            </div>
+            <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+                <label class="block font-bold mb-2">Capacity</label>
+                <p-inputNumber
+                    id="capacity"
+                    [(ngModel)]="warehouse.capacity"
+                    styleClass="w-full"
+                ></p-inputNumber>
+            </div>
+
+            <!-- Inventories (Read-only display) -->
+            <div class="p-col-12" style="display: flex; flex-direction: column;">
+                <label  class="block font-bold mb-2">Inventories</label>
+                <p-listbox
+
+                    [options]="warehouse.inventories"
+                    optionLabel="name"
+                    [disabled]="true"
+                    styleClass="w-full"
+                    [listStyle]="{ 'max-height': '150px' }"
+                ></p-listbox>
+                <small class="text-gray-500">Inventories are managed separately.</small>
+            </div>
+        </div>
+    </ng-template>
+    <ng-template pTemplate="footer">
+        <p-button
+            label="Cancel"
+            icon="pi pi-times"
+            text
+            (click)="hideDialog()"
+        ></p-button>
+        <p-button
+            label="Save"
+            icon="pi pi-check"
+            (click)="saveWarehouse()"
+        ></p-button>
+    </ng-template>
+</p-dialog><p-dialog
+    [(visible)]="warehouseDialog"
+    [style]="{ width: '60vw', 'min-width': '600px', 'max-width': '600px' }"
+    header="Warehouse Details"
+    [modal]="true"
+    [closable]="false"
+    class="p-fluid"
+>
+    <ng-template pTemplate="content">
+        <div class="p-grid p-formgrid" style="gap: 1.5rem; padding: 1rem; display: flex; flex-wrap: wrap;">
+            <!-- Name and Location -->
+            <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+                <label for="name" class="block font-bold mb-2">Name</label>
+                <input
+                    pInputText
+                    id="name"
+                    [(ngModel)]="warehouse.name"
+                    required
+                    autofocus
+                    class="w-full"
+                />
+                <small class="text-red-500" *ngIf="submitted && !warehouse.name">Name is required.</small>
+            </div>
+            <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+                <label class="block font-bold mb-2">Location</label>
+                <input
+                    pInputText
+
+                    [(ngModel)]="warehouse.location"
+                    required
+                    class="w-full"
+                />
+                <small class="text-red-500" *ngIf="submitted && !warehouse.location">Location is required.</small>
+            </div>
+
+            <!-- Country and Capacity -->
+            <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+                <label class="block font-bold mb-2">Country</label>
+                <p-dropdown
+
+                    [options]="countries"
+                    [(ngModel)]="warehouse.country"
+                    optionLabel="name"
+                    optionValue="name"
+                    placeholder="Select a country"
+                    styleClass="w-full"
+                ></p-dropdown>
+            </div>
+            <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
+                <label  class="block font-bold mb-2">Capacity</label>
+                <p-inputNumber
+                    id="capacity"
+                    [(ngModel)]="warehouse.capacity"
+                    [allowEmpty]="false"
+                    [min]="0"
+                    [useGrouping]="false"
+                    [showButtons]="true"
+                    [buttonLayout]="'horizontal'"
+                    styleClass="w-full"
+                ></p-inputNumber>
+                <small class="text-red-500" *ngIf="submitted && warehouse.capacity == null">Capacity is required.</small>
+            </div>
+
+            <!-- Inventories (Read-only display) -->
+            <div class="p-col-12" style="display: flex; flex-direction: column;">
+                <label  class="block font-bold mb-2">Inventories</label>
+                <p-listbox
+                    id="inventories"
+                    [options]="warehouse.inventories"
+                    optionLabel="name"
+                    [disabled]="true"
+                    styleClass="w-full"
+                    [listStyle]="{ 'max-height': '150px' }"
+                ></p-listbox>
+                <small class="text-gray-500">Inventories are managed separately.</small>
+            </div>
+        </div>
+    </ng-template>
+    <ng-template pTemplate="footer">
+        <p-button
+            label="Cancel"
+            icon="pi pi-times"
+            text
+            (click)="hideDialog()"
+        ></p-button>
+        <p-button
+            label="Save"
+            icon="pi pi-check"
+            (click)="saveWarehouse()"
+        ></p-button>
+    </ng-template>
+</p-dialog>
+<p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>
+<p-dialog header="Assign Inventories" [(visible)]="inventoryDialogVisible" [modal]="true" [style]="{ width: '60vw' }">
+    <ng-template pTemplate="content">
+        <p-table [value]="unassignedInventories" [(selection)]="selectedInventories" dataKey="id" selectionMode="multiple">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th><p-tableHeaderCheckbox></p-tableHeaderCheckbox></th>
+                    <th>Name</th>
+                    <th>Reference</th>
+                    <th>Available</th>
+                    <th>Reserved</th>
+                    <th>Product Name</th>
+                    <th>Product Reference</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-inv>
+                <tr>
+                    <td><p-tableCheckbox [value]="inv"></p-tableCheckbox></td>
+                    <td>{{ inv.inventory.name }}</td>
+                    <td>{{ inv.inventory.reference }}</td>
+                    <td>{{ inv.inventory.availableQuantity }}</td>
+                    <td>{{ inv.inventory.reservedQuantity }}</td>
+                    <td>{{ inv.product.name }}</td>
+                    <td>{{ inv.product.reference }}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Cancel" icon="pi pi-times" (click)="inventoryDialogVisible = false" text></p-button>
+        <p-button label="Assign" icon="pi pi-check" (click)="assignSelectedInventoriesToWarehouse()"></p-button>
+    </ng-template>
+</p-dialog>

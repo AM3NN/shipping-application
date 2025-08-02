@@ -52,21 +52,7 @@ public class ProductServiceSecurityConfig {
 
     @Bean
     public Converter<Jwt, JwtAuthenticationToken> jwtAuthenticationConverter() {
-        return jwt -> {
-            List<GrantedAuthority> authorities = new ArrayList<>();
-            Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
-            if (realmAccess != null && realmAccess.containsKey("roles")) {
-                List<String> roles = (List<String>) realmAccess.get("roles");
-                authorities.addAll(roles.stream()
-                        .map(role -> {
-                            String finalRole = role.startsWith("ROLE_") ? role : "ROLE_" + role;
-                            return new SimpleGrantedAuthority(finalRole);
-                        })
-                        .toList());
-            }
-
-            return new JwtAuthenticationToken(jwt, authorities);
-        };
+        return new CustomJwtAuthenticationConverter();
     }
 
 

@@ -1,6 +1,8 @@
 package tn.epac.productservice.Services;
 
 import tn.epac.productservice.DTO.InventoryDTO;
+import tn.epac.productservice.DTO.InventoryWithProductDTO;
+import tn.epac.productservice.DTO.InventoryWithWarehouseDTO;
 import tn.epac.productservice.Entities.Inventory;
 
 import java.util.List;
@@ -19,5 +21,9 @@ public interface IInventoryservice {
 
     List<InventoryDTO> getInventoriesByWarehouse(String warehouseId);
 
-    List<InventoryDTO> getInventoriesByProduct(String productId);
+    List<InventoryWithWarehouseDTO> getInventoriesByProduct(String productId);
+
+    InventoryDTO createAndAssignInventoryToProduct(Inventory inventory, String productId,String warehouseId);
+
+    List<InventoryWithProductDTO> getInventoriesWithoutWarehouse();
 }

@@ -16,9 +16,8 @@
     #dt
     [value]="products()"
     [rows]="10"
-
     [paginator]="true"
-    [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
+    [globalFilterFields]="['reference', 'name', 'category', 'version', 'inventoryStatus']"
     [tableStyle]="{ 'min-width': '75rem' }"
     [(selection)]="selectedProducts"
     [rowHover]="true"
@@ -27,7 +26,7 @@
     [showCurrentPageReport]="true"
     [rowsPerPageOptions]="[10, 20, 30]"
 >
-    <ng-template #caption>
+    <ng-template pTemplate="caption">
         <div class="flex items-center justify-between">
             <h5 class="m-0">Manage Products</h5>
             <p-iconfield>
@@ -36,50 +35,68 @@
             </p-iconfield>
         </div>
     </ng-template>
-    <ng-template #header>
+    <ng-template pTemplate="header">
         <tr>
             <th style="width: 3rem">
                 <p-tableHeaderCheckbox />
             </th>
-            <th style="min-width: 16rem">Reference</th>
-            <th pSortableColumn="name" style="min-width:16rem">
+            <th pSortableColumn="reference" style="min-width: 10rem">
+                Reference
+                <p-sortIcon field="reference" />
+            </th>
+            <th pSortableColumn="name" style="min-width: 10rem">
                 Name
                 <p-sortIcon field="name" />
             </th>
-            <th>Image</th>
+            <th style="min-width: 8rem">Image</th>
+            <th style="min-width: 15rem">Description</th>
+            <th pSortableColumn="type" style="min-width: 12rem">
+                Type
+                <p-sortIcon field="type" />
+            </th>
+            <th pSortableColumn="version" style="min-width: 10rem">
+                Version
+                <p-sortIcon field="version" />
+            </th>
             <th pSortableColumn="price" style="min-width: 8rem">
                 Price
                 <p-sortIcon field="price" />
             </th>
-            <th pSortableColumn="category" style="min-width:10rem">
+            <th pSortableColumn="quantity" style="min-width: 8rem">
+                Quantity
+                <p-sortIcon field="quantity" />
+            </th>
+            <th pSortableColumn="category" style="min-width: 12rem">
                 Category
                 <p-sortIcon field="category" />
-            </th>
-            <th pSortableColumn="rating" style="min-width: 12rem">
-               Version
-                <p-sortIcon field="rating" />
             </th>
             <th pSortableColumn="inventoryStatus" style="min-width: 12rem">
                 Status
                 <p-sortIcon field="inventoryStatus" />
             </th>
-            <th style="min-width: 12rem"></th>
+            <th style="min-width: 12rem">Actions</th>
         </tr>
     </ng-template>
-    <ng-template #body let-product>
+    <ng-template pTemplate="body" let-product>
         <tr>
             <td style="width: 3rem">
                 <p-tableCheckbox [value]="product" />
             </td>
-            <td style="min-width: 16rem">{{ product.reference }}</td>
-            <td style="min-width: 16rem">{{ product.name }}</td>
-            <td>
-                <img   [src]="'http://localhost:8082' + product.imageUrl" [alt]="product.name" style="width: 64px; height: 64px;" class="rounded" *ngIf="product.imageUrl; else noImage"/>
+            <td style="min-width: 10rem">{{ product.reference }}</td>
+            <td style="min-width: 10rem">{{ product.name }}</td>
+            <td style="min-width: 8rem">
+                <img
+                    [src]="'http://localhost:8082' + product.imageUrl"
+                    [alt]="product.name"
+                    style="width: 48px; height: 48px;"
+                    class="rounded"
+                    *ngIf="product.imageUrl; else noImage"
+                />
                 <ng-template #noImage>
                     <span>-</span>
                 </ng-template>
             </td>
-            <td style="min-width: 24rem">{{ product.description }}</td>
+            <td style="min-width: 15rem">{{ product.description }}</td>
             <td style="min-width: 12rem">{{ product.type }}</td>
             <td style="min-width: 10rem">{{ product.version }}</td>
             <td style="min-width: 8rem">{{ product.price | currency: 'USD' }}</td>
@@ -88,13 +105,48 @@
             <td style="min-width: 12rem">
                 <p-tag [value]="product.inventoryStatus" [severity]="getSeverity(product.inventoryStatus)"></p-tag>
             </td>
-            <td style="min-width: 12rem">
-                <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(product)" />
-                <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(product)" />
+            <td style="min-width: 30rem">
+                <div class="flex flex-wrap items-center gap-2">
+                    <p-button
+                        icon="pi pi-pencil"
+                        class="mr-2"
+                        [rounded]="true"
+                        [outlined]="true"
+                        (click)="editProduct(product)"
+                    ></p-button>
+
+                    <p-button
+                        icon="pi pi-trash"
+                        severity="danger"
+                        [rounded]="true"
+                        [outlined]="true"
+                        (click)="deleteProduct(product)"
+                    ></p-button>
+
+                    <p-button
+                        icon="pi pi-plus-circle"
+                        label="Add Inventory"
+                        severity="success"
+
+                        [outlined]="true"
+                        (click)="openAddInventoryDialog(product)"
+                        [rounded]="true"
+                    ></p-button>
+
+                    <p-button
+                        icon="pi pi-eye"
+                        label="View"
+                        severity="info"
+
+                        [outlined]="true"
+                        [rounded]="true"
+                        (click)="openViewInventoriesDialog(product)"
+                    ></p-button>
+                </div>
             </td>
+
         </tr>
     </ng-template>
-
 </p-table>
 <p-dialog
     [(visible)]="productDialog"
@@ -222,18 +274,34 @@ class="p-fluid"
         </div>
 
         <!-- Image URL (full width) -->
-        <div class="p-col-12 p-sm-6 p-md-6" style="display: flex; flex-direction: column; flex: 1 1 45%;">
-            <label class="block font-bold mb-2">Upload Image</label>
-            <p-fileUpload
-                name="image"
-                mode="basic"
-                accept="image/*"
-                [auto]="true"
-                (onSelect)="onImageSelect($event)"
-                [maxFileSize]="1000000"
-                chooseLabel="Choisir Image"
-                class="w-full"
-            />
+
+        <div class="col-span-full lg:col-span-6">
+            <div class="card">
+                <div class="font-semibold text-xl mb-4">Image Upload</div>
+
+                <p-fileUpload
+                    name="image"
+                    [multiple]="false"
+                    accept="image/*"
+                    maxFileSize="1000000"
+                    mode="advanced"
+                    auto="true"
+                    customUpload="true"
+                    (uploadHandler)="onUpload($event)"
+                >
+                    <ng-template #empty>
+                        <div>Drag an image here or click to select one.</div>
+                    </ng-template>
+
+                    <ng-template #content>
+                        <div *ngIf="previewImage">
+                            <img [src]="previewImage" alt="Aperçu" style="max-width: 200px; margin-top: 1rem;" />
+                        </div>
+                    </ng-template>
+                </p-fileUpload>
+
+            </div>
+
         </div>
     </div>
 </ng-template>
@@ -257,4 +325,143 @@ class="p-fluid"
 
 
 <p-confirmdialog [style]="{ width: '450px' }"></p-confirmdialog>
+<p-dialog
+    header="Add Inventory"
+    [(visible)]="addInventoryDialogVisible"
+    [modal]="true"
+    [style]="{ width: '35vw' }"
+    [closable]="true"
+>
+    <ng-template pTemplate="content">
+        <div class="p-fluid grid formgrid">
+            <div class="field col-12 mb-3">
+                <label for="warehouseId">Select Warehouse</label>
+                <p-dropdown
+                    id="warehouseId"
+                    [options]="warehouses"
+                    [(ngModel)]="newInventory.warehouseId"
+                    optionLabel="name"
+                    optionValue="id"
+                    placeholder="Select a warehouse"
+                ></p-dropdown>
+            </div>
+
+            <div class="field col-2 mb-3">
+                <label for="reservedQuantity">Reserved Quantity</label>
+                <input
+                    id="reservedQuantity"
+                    type="number"
+                    pInputText
+                    [(ngModel)]="newInventory.reservedQuantity"
+                    placeholder="e.g. 20"
+                />
+            </div>
+
+            <div class="field col-2 mb-3">
+                <label for="availableQuantity">Available Quantity</label>
+                <input
+                    id="availableQuantity"
+                    type="number"
+                    pInputText
+                    [(ngModel)]="newInventory.availableQuantity"
+                    placeholder="e.g. 50"
+                />
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2 w-full">
+            <p-button
+                label="Cancel"
+                icon="pi pi-times"
+                text
+                (click)="addInventoryDialogVisible = false"
+            ></p-button>
+            <p-button
+                label="Save"
+                icon="pi pi-check"
+                (click)="saveNewInventory()"
+            ></p-button>
+        </div>
+    </ng-template>
+</p-dialog>
+
+
+<p-dialog
+    header="Inventories"
+    [(visible)]="viewInventoriesDialogVisible"
+    [modal]="true"
+    [style]="{ width: '60vw' }"
+>
+    <ng-template pTemplate="content">
+        <p-table
+            *ngIf="selectedProductInventories.length > 0; else noInventory"
+            [value]="selectedProductInventories"
+            rowGroupMode="subheader"
+            groupRowsBy="warehouse.name"
+            sortField="warehouse.name"
+            sortMode="single"
+            [paginator]="true"
+            [rows]="5"
+            [scrollable]="true"
+            scrollHeight="300px"
+        >
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Warehouse</th>
+                    <th>Warehouse Country</th>
+                    <th>Available Quantity</th>
+                    <th>Reserved Quantity</th>
+                </tr>
+            </ng-template>
+
+            <!-- Group Header -->
+            <ng-template pTemplate="groupheader" let-rowData>
+                <tr pRowGroupHeader>
+                    <td colspan="4" class="font-bold">
+                        🏬 Warehouse: {{ rowData.warehouse?.name ?? 'N/A' }}
+                    </td>
+                </tr>
+            </ng-template>
+
+            <!-- Table Body -->
+            <ng-template pTemplate="body" let-inv>
+                <tr>
+                    <td>{{ inv.warehouse?.name ?? 'N/A' }}</td>
+                    <td>
+                        <div class="flex items-center gap-2" *ngIf="getCountryCode(inv.warehouse?.country) as code">
+                            <img
+                                src="https://primefaces.org/cdn/primeng/images/demo/flag/flag_placeholder.png"
+                                [class]="'flag flag-' + code"
+                                style="width: 20px"
+                            />
+                            <span>{{ inv.warehouse?.country }}</span>
+                        </div>
+                    </td>
+                    <td>{{ inv.inventory.availableQuantity }}</td>
+                    <td>{{ inv.inventory.reservedQuantity }}</td>
+                </tr>
+            </ng-template>
+
+            <!-- Group Footer -->
+            <ng-template pTemplate="groupfooter" let-rowData>
+                <tr class="font-bold">
+                    <td colspan="2" class="text-right">Total for {{ rowData.warehouse?.name ?? 'N/A' }}:</td>
+                    <td>{{ calculateTotalAvailable(rowData.warehouse?.name) }}</td>
+                    <td>{{ calculateTotalReserved(rowData.warehouse?.name) }}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+
+        <ng-template #noInventory>
+            <p>No inventories available.</p>
+        </ng-template>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Close" icon="pi pi-times" text (click)="viewInventoriesDialogVisible = false"></p-button>
+    </ng-template>
+</p-dialog>
+
 

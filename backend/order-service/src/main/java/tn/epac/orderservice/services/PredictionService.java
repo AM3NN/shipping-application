@@ -28,6 +28,13 @@ public class PredictionService {
         inputFeatures.put("cover_finish_type", orderRequestDTO.getCoverFinishType());
         inputFeatures.put("binding_type", orderRequestDTO.getBindingType());
 
+        // Missing fields required by Flask model
+        inputFeatures.put("shrinkwrap", orderRequestDTO.isShrinkwrap());
+        inputFeatures.put("production_page", orderRequestDTO.getProductionPage());
+        inputFeatures.put("perf", orderRequestDTO.isPerf());
+        inputFeatures.put("three_hole_drill", orderRequestDTO.isThreeHoleDrill());
+        inputFeatures.put("text_color", orderRequestDTO.getTextColor());
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(inputFeatures, headers);

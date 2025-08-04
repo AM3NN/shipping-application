@@ -6,6 +6,7 @@ import tn.epac.orderservice.dto.OrderResponseDTO;
 import tn.epac.orderservice.entities.Order;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -73,13 +74,21 @@ class OrderMapperTest {
     void constructor_shouldThrowException() throws Exception {
         Constructor<OrderMapper> constructor = OrderMapper.class.getDeclaredConstructor();
         constructor.setAccessible(true); // Make private constructor accessible
-        Exception exception = assertThrows(UnsupportedOperationException.class, constructor::newInstance);
-        assertEquals("OrderMapper is a utility class and cannot be instantiated", exception.getMessage());
+
+        try {
+            constructor.newInstance();
+            fail("Expected UnsupportedOperationException to be thrown");
+        } catch (InvocationTargetException ex) {
+            Throwable cause = ex.getCause();
+            assertTrue(cause instanceof UnsupportedOperationException);
+            assertEquals("OrderMapper is a utility class and cannot be instantiated", cause.getMessage());
+        }
     }
+
     @Test
     void toDTO() {
         Order order = new Order();
-        order.setId(123); // Use integer here
+        order.setId(123);
         order.setStatus("Completed");
         order.setDeliveryLocation("Customer B");
         order.setCreatedDate(LocalDate.of(2025, 7, 20));

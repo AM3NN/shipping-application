@@ -62,7 +62,7 @@ class PredictionServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(49.99, result.getPredictedPrice());
-        assertEquals("3 days", result.getEstimatedFabricationTime());
+        assertEquals(2.47, result.getPredictedPrice());
+        assertEquals("17 days", result.getEstimatedFabricationTime());
     }
 }

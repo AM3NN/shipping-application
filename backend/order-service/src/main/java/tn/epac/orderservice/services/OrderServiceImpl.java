@@ -2,7 +2,6 @@ package tn.epac.orderservice.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tn.epac.orderservice.dto.OrderRequestDTO;
 import tn.epac.orderservice.dto.OrderResponseDTO;
@@ -12,7 +11,6 @@ import tn.epac.orderservice.mappers.OrderMapper;
 import tn.epac.orderservice.repository.OrderRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -38,26 +36,21 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO) {
         logger.info("Creating order with data: {}", orderRequestDTO);
 
-        // Get prediction data
         var prediction = predictionService.predict(orderRequestDTO);
         logger.debug("Received prediction: {}", prediction);
         orderRequestDTO.setPredictedPrice(prediction.getPredictedPrice());
         orderRequestDTO.setEstimatedFabricationTime(prediction.getEstimatedFabricationTime());
 
-        // Map DTO to entity
         Order order = OrderMapper.toEntity(orderRequestDTO);
 
-        // Set the auto-incremented integer ID using the sequence generator
         int newId = sequenceGeneratorService.getNextSequence("orders_sequence");
         order.setId(newId);
 
         logger.debug("Mapped order entity with new ID: {}", order);
 
-        // Save order to database
         Order savedOrder = orderRepository.save(order);
         logger.info("Saved order with ID: {}", savedOrder.getId());
 
-        // Map entity to response DTO
         OrderResponseDTO responseDTO = OrderMapper.toDTO(savedOrder);
         logger.debug("Returning OrderResponseDTO: {}", responseDTO);
 

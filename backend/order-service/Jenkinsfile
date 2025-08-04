@@ -13,7 +13,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/AM3NN/shipping-application.git'
+                git branch: 'amen-React', url: 'https://github.com/AM3NN/shipping-application.git'
             }
         }
 

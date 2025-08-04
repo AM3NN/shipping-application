@@ -13,11 +13,10 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "orders")
-public class    Order {
+public class  Order {
 
     @Id
     private int id;
-
     private String status;
     private String shippingMethod;
     private String shippingLocation;

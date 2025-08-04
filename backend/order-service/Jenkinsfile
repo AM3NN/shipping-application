@@ -9,7 +9,7 @@ pipeline {
     environment {
         MAVEN_OPTS = '-Dmaven.test.failure.ignore=false'
         SONAR_HOST_URL = 'http://localhost:9000'  // update if needed
-        SONAR_LOGIN = credentials('sonar-token-id') // Jenkins credential ID for Sonar token
+        SONAR_LOGIN = credentials('sqp_1421b5b30a3d2fbaf664cd9bde97d1dc674b62e1') // Jenkins credential ID for Sonar token
         SONAR_PROJECT_KEY = 'order-service'
     }
 

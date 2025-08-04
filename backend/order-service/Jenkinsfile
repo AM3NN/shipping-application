@@ -7,9 +7,6 @@ pipeline {
     }
 
     environment {
-        MAVEN_OPTS = '-Dmaven.test.failure.ignore=false'
-        SONAR_HOST_URL = 'http://localhost:9000'  // update if needed
-        SONAR_LOGIN = credentials('sqp_1421b5b30a3d2fbaf664cd9bde97d1dc674b62e1') // Jenkins credential ID for Sonar token
         SONAR_PROJECT_KEY = 'order-service'
     }
 
@@ -24,39 +21,21 @@ pipeline {
             }
         }
 
-        stage('Build Order Service') {
+        stage('Build, Test & SonarQube Analysis') {
             steps {
                 dir('backend/order-service') {
-                    bat 'mvn clean install'
+                    // This uses the SonarQube server config named 'sonar-server'
+                    withSonarQubeEnv('sonar-server') {
+                        bat "mvn clean verify sonar:sonar -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} -Dmaven.test.failure.ignore=false"
+                    }
                 }
             }
         }
 
-        stage('Run Tests') {
+        stage('Quality Gate') {
             steps {
-                dir('backend/order-service') {
-                    bat 'mvn test'
-                }
-            }
-        }
-
-        stage('Generate Coverage Report') {
-            steps {
-                dir('backend/order-service') {
-                    bat 'mvn verify'
-                }
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                dir('backend/order-service') {
-                    bat """
-                    mvn org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar ^
-                      -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} ^
-                      -Dsonar.host.url=${env.SONAR_HOST_URL} ^
-                      -Dsonar.login=${env.SONAR_LOGIN}
-                    """
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
                 }
             }
         }
@@ -69,7 +48,10 @@ pipeline {
 
         stage('Publish JaCoCo Report') {
             steps {
-                jacoco execPattern: '**/target/jacoco.exec', classPattern: '**/target/classes', sourcePattern: '**/src/main/java', exclusionPattern: '**/target/test-classes'
+                jacoco execPattern: '**/target/jacoco.exec',
+                       classPattern: '**/target/classes',
+                       sourcePattern: '**/src/main/java',
+                       exclusionPattern: '**/target/test-classes'
             }
         }
     }

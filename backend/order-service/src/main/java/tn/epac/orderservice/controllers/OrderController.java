@@ -27,7 +27,6 @@ public class OrderController {
         return orderService.getAllOrders();
     }
 
-    // Change String id to int id here:
     @GetMapping("/{id}")
     public OrderResponseDTO getOrderById(@PathVariable int id) {
         return orderService.getOrderById(id);

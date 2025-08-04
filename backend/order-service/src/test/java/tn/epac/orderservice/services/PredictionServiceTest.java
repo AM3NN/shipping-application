@@ -31,7 +31,7 @@ class PredictionServiceTest {
     }
 
     @Test
-    void predict_shouldReturnPredictionResponse() {
+    void predict_shouldReturnPredictionResponse_withValidBody() {
         // Arrange
         OrderRequestDTO dto = new OrderRequestDTO();
         dto.setQuantity(100);
@@ -44,7 +44,7 @@ class PredictionServiceTest {
         dto.setBindingType("Stapled");
 
         Map<String, Object> mockedResponseBody = new HashMap<>();
-        mockedResponseBody.put("predictedPrice", 49.99);
+        mockedResponseBody.put("predictedPrice", 2.47);
         mockedResponseBody.put("estimatedFabricationTime", "3 days");
 
         ResponseEntity<Map<String, Object>> mockedResponse =
@@ -64,5 +64,57 @@ class PredictionServiceTest {
         assertNotNull(result);
         assertEquals(2.47, result.getPredictedPrice());
         assertEquals("17 days", result.getEstimatedFabricationTime());
+    }
+
+    @Test
+    void predict_shouldHandleNullBody() {
+        // Arrange
+        OrderRequestDTO dto = new OrderRequestDTO();
+
+        ResponseEntity<Map<String, Object>> mockedResponse =
+                new ResponseEntity<>(null, HttpStatus.OK);
+
+        when(restTemplate.exchange(
+                eq("http://localhost:5000/predict"),
+                eq(HttpMethod.POST),
+                any(HttpEntity.class),
+                any(ParameterizedTypeReference.class)
+        )).thenReturn(mockedResponse);
+
+        // Act
+        PredictionResponse result = predictionService.predict(dto);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1.73, result.getPredictedPrice());
+        assertEquals("18 days", result.getEstimatedFabricationTime());
+    }
+
+    @Test
+    void predict_shouldHandleInvalidTypes() {
+        // Arrange
+        OrderRequestDTO dto = new OrderRequestDTO();
+
+        Map<String, Object> mockedResponseBody = new HashMap<>();
+        mockedResponseBody.put("predictedPrice", "invalid"); // not a number
+        mockedResponseBody.put("estimatedFabricationTime", 123); // not a string
+
+        ResponseEntity<Map<String, Object>> mockedResponse =
+                new ResponseEntity<>(mockedResponseBody, HttpStatus.OK);
+
+        when(restTemplate.exchange(
+                eq("http://localhost:5000/predict"),
+                eq(HttpMethod.POST),
+                any(HttpEntity.class),
+                any(ParameterizedTypeReference.class)
+        )).thenReturn(mockedResponse);
+
+        // Act
+        PredictionResponse result = predictionService.predict(dto);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1.73, result.getPredictedPrice()); // fallback
+        assertEquals("18 days", result.getEstimatedFabricationTime());
     }
 }

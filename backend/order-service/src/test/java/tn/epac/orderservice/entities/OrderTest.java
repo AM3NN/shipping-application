@@ -11,33 +11,7 @@ class OrderTest {
 
     @Test
     void testGettersAndSetters() {
-        Order order = new Order();
-        order.setId(123);
-        order.setStatus("Pending");
-        order.setShippingMethod("Air");
-        order.setShippingLocation("Warehouse A");
-        order.setDeliveryLocation("Customer B");
-        order.setCreatedDate(LocalDate.of(2025, 8, 4));
-        order.setExpectedDate(LocalDate.of(2025, 8, 10));
-        order.setClosedDate(LocalDate.of(2025, 8, 12));
-        order.setQuantity(15);
-        order.setReference("Ref123");
-        order.setType("Express");
-        order.setDirection("Outbound");
-        order.setDomain("Retail");
-        order.setVersion(1L);
-        order.setShippingCost(new BigDecimal("50.00"));
-        order.setShippingCurrency("USD");
-        order.setDiscount(new BigDecimal("5.00"));
-        order.setDiscountCurrency("USD");
-        order.setNetAmount(new BigDecimal("200.00"));
-        order.setNetCurrency("USD");
-        order.setTax(new BigDecimal("20.00"));
-        order.setTaxCurrency("USD");
-        order.setTotalAmount(new BigDecimal("265.00"));
-        order.setTotalCurrency("USD");
-        order.setPredictedPrice(123.45);
-        order.setEstimatedFabricationTime("3 days");
+        Order order = getOrder();
 
         assertAll("order properties",
                 () -> assertEquals(123, order.getId()),
@@ -67,6 +41,37 @@ class OrderTest {
                 () -> assertEquals(123.45, order.getPredictedPrice()),
                 () -> assertEquals("3 days", order.getEstimatedFabricationTime())
         );
+    }
+
+    private static Order getOrder() {
+        Order order = new Order();
+        order.setId(123);
+        order.setStatus("Pending");
+        order.setShippingMethod("Air");
+        order.setShippingLocation("Warehouse A");
+        order.setDeliveryLocation("Customer B");
+        order.setCreatedDate(LocalDate.of(2025, 8, 4));
+        order.setExpectedDate(LocalDate.of(2025, 8, 10));
+        order.setClosedDate(LocalDate.of(2025, 8, 12));
+        order.setQuantity(15);
+        order.setReference("Ref123");
+        order.setType("Express");
+        order.setDirection("Outbound");
+        order.setDomain("Retail");
+        order.setVersion(1L);
+        order.setShippingCost(new BigDecimal("50.00"));
+        order.setShippingCurrency("USD");
+        order.setDiscount(new BigDecimal("5.00"));
+        order.setDiscountCurrency("USD");
+        order.setNetAmount(new BigDecimal("200.00"));
+        order.setNetCurrency("USD");
+        order.setTax(new BigDecimal("20.00"));
+        order.setTaxCurrency("USD");
+        order.setTotalAmount(new BigDecimal("265.00"));
+        order.setTotalCurrency("USD");
+        order.setPredictedPrice(123.45);
+        order.setEstimatedFabricationTime("3 days");
+        return order;
     }
 
     @Test

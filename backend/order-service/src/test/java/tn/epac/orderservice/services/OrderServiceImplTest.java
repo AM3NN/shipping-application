@@ -82,8 +82,8 @@ class OrderServiceImplTest {
 
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertEquals("NEW", result.get(0).getStatus());
-        assertEquals(1, result.get(0).getId());
+        assertEquals("NEW", result.getFirst().getStatus());
+        assertEquals(1, result.getFirst().getId());
     }
 
     @Test

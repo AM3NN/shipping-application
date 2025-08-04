@@ -20,7 +20,7 @@ pipeline {
         stage('Build Order Service') {
             steps {
                 dir('backend/order-service') {
-                    sh 'mvn clean install'
+                    bat 'mvn clean install'
                 }
             }
         }
@@ -28,7 +28,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 dir('backend/order-service') {
-                    sh 'mvn test'
+                    bat 'mvn test'
                 }
             }
         }

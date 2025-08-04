@@ -5,11 +5,11 @@ import tn.epac.orderservice.dto.OrderRequestDTO;
 import tn.epac.orderservice.dto.OrderResponseDTO;
 import tn.epac.orderservice.entities.Order;
 
+import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class OrderMapperTest {
 
@@ -69,7 +69,13 @@ class OrderMapperTest {
         assertEquals("2 days", order.getEstimatedFabricationTime());
         assertEquals(10, order.getQuantity());
     }
-
+    @Test
+    void constructor_shouldThrowException() throws Exception {
+        Constructor<OrderMapper> constructor = OrderMapper.class.getDeclaredConstructor();
+        constructor.setAccessible(true); // Make private constructor accessible
+        Exception exception = assertThrows(UnsupportedOperationException.class, constructor::newInstance);
+        assertEquals("OrderMapper is a utility class and cannot be instantiated", exception.getMessage());
+    }
     @Test
     void toDTO() {
         Order order = new Order();

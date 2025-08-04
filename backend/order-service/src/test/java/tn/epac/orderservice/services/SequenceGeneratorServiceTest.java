@@ -35,10 +35,7 @@ class SequenceGeneratorServiceTest {
                 eq(DatabaseSequence.class)
         )).thenReturn(mockSequence);
 
-        // Act
         int result = sequenceGeneratorService.getNextSequence("order_sequence");
-
-        // Assert
         assertEquals(5, result);
     }
 

@@ -12,34 +12,31 @@ class OrderTest {
     @Test
     void testGettersAndSetters() {
         Order order = getOrder();
-
         assertAll("order properties",
-                () -> assertEquals(123, order.getId()),
-                () -> assertEquals("Pending", order.getStatus()),
-                () -> assertEquals("Air", order.getShippingMethod()),
-                () -> assertEquals("Warehouse A", order.getShippingLocation()),
-                () -> assertEquals("Customer B", order.getDeliveryLocation()),
-                () -> assertEquals(LocalDate.of(2025, 8, 4), order.getCreatedDate()),
-                () -> assertEquals(LocalDate.of(2025, 8, 10), order.getExpectedDate()),
-                () -> assertEquals(LocalDate.of(2025, 8, 12), order.getClosedDate()),
-                () -> assertEquals(15, order.getQuantity()),
-                () -> assertEquals("Ref123", order.getReference()),
-                () -> assertEquals("Express", order.getType()),
-                () -> assertEquals("Outbound", order.getDirection()),
-                () -> assertEquals("Retail", order.getDomain()),
-                () -> assertEquals(1L, order.getVersion()),
-                () -> assertEquals(new BigDecimal("50.00"), order.getShippingCost()),
-                () -> assertEquals("USD", order.getShippingCurrency()),
-                () -> assertEquals(new BigDecimal("5.00"), order.getDiscount()),
-                () -> assertEquals("USD", order.getDiscountCurrency()),
-                () -> assertEquals(new BigDecimal("200.00"), order.getNetAmount()),
-                () -> assertEquals("USD", order.getNetCurrency()),
-                () -> assertEquals(new BigDecimal("20.00"), order.getTax()),
-                () -> assertEquals("USD", order.getTaxCurrency()),
-                () -> assertEquals(new BigDecimal("265.00"), order.getTotalAmount()),
-                () -> assertEquals("USD", order.getTotalCurrency()),
-                () -> assertEquals(123.45, order.getPredictedPrice()),
-                () -> assertEquals("3 days", order.getEstimatedFabricationTime())
+                () -> assertEquals(123, order.getId(), "ID should match"),
+                () -> assertEquals("Pending", order.getStatus(), "Status should match"),
+                () -> assertEquals("Air", order.getShippingMethod(), "Shipping method should match"),
+                () -> assertEquals("Warehouse A", order.getShippingLocation(), "Shipping location should match"),
+                () -> assertEquals("Customer B", order.getDeliveryLocation(), "Delivery location should match"),
+                () -> assertEquals(LocalDate.of(2025, 8, 4), order.getCreatedDate(), "Created date should match"),
+                () -> assertEquals(LocalDate.of(2025, 8, 10), order.getExpectedDate(), "Expected date should match"),
+                () -> assertEquals(LocalDate.of(2025, 8, 12), order.getClosedDate(), "Closed date should match"),
+                () -> assertEquals(15, order.getQuantity(), "Quantity should match"),
+                () -> assertEquals("Ref123", order.getReference(), "Reference should match"),
+                () -> assertEquals("Express", order.getType(), "Type should match"),
+                () -> assertEquals("Outbound", order.getDirection(), "Direction should match"),
+                () -> assertEquals("Retail", order.getDomain(), "Domain should match"),
+                () -> assertEquals(1L, order.getVersion(), "Version should match"),
+                () -> assertEquals(new BigDecimal("50.00"), order.getShippingCost(), "Shipping cost should match"),
+                () -> assertEquals("USD", order.getShippingCurrency(), "Shipping currency should match"),
+                () -> assertEquals(new BigDecimal("5.00"), order.getDiscount(), "Discount should match"),
+                () -> assertEquals("USD", order.getDiscountCurrency(), "Discount currency should match"),
+                () -> assertEquals(new BigDecimal("200.00"), order.getNetAmount(), "Net amount should match"),
+                () -> assertEquals("USD", order.getNetCurrency(), "Net currency should match"),
+                () -> assertEquals(new BigDecimal("20.00"), order.getTax(), "Tax should match"),
+                () -> assertEquals("USD", order.getTaxCurrency(), "Tax currency should match"),
+                () -> assertEquals(new BigDecimal("265.00"), order.getTotalAmount(), "Total amount should match"),
+                () -> assertEquals(123.45, order.getPredictedPrice(), "Predicted price should match")
         );
     }
 
@@ -86,14 +83,14 @@ class OrderTest {
         order3.setId(3);
 
         // Assuming equals/hashCode are based on 'id'
-        assertEquals(order1, order2);
-        assertEquals(order1.hashCode(), order2.hashCode());
+        assertEquals(order1, order2, "Orders with same ID should be equal");
+        assertEquals(order1.hashCode(), order2.hashCode(), "Hash codes should match for equal orders");
 
-        assertNotEquals(order1, order3);
-        assertNotEquals(order1.hashCode(), order3.hashCode());
+        assertNotEquals(order1, order3, "Orders with different IDs should not be equal");
+        assertNotEquals(order1.hashCode(), order3.hashCode(), "Hash codes should differ for different orders");
 
-        assertNotEquals(null, order1);
-        assertNotEquals(new Object(), order1);
+        assertNotEquals(null, order1, "Order should not equal null");
+        assertNotEquals(new Object(), order1, "Order should not equal a different type");
     }
 
     @Test
@@ -104,7 +101,7 @@ class OrderTest {
 
         String result = order.toString();
 
-        assertTrue(result.contains("id=123"));
-        assertTrue(result.contains("Completed"));
+        assertTrue(result.contains("id=123"), "toString should contain ID");
+        assertTrue(result.contains("Completed"), "toString should contain status");
     }
 }

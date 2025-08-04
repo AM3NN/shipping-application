@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(OrderController.class)
 @Import(OrderControllerTest.TestConfig.class)
-public class OrderControllerTest {
+ class OrderControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

@@ -80,6 +80,7 @@ public class OrderControllerTest {
                 .andExpect(jsonPath("$[1].id").value(2));
     }
 
+
     @Test
     void getOrderById() throws Exception {
         int orderId = 123;
@@ -88,7 +89,7 @@ public class OrderControllerTest {
         responseDTO.setId(orderId);
         responseDTO.setStatus("PROCESSING");
 
-        when(orderService.getOrderById(eq(orderId))).thenReturn(responseDTO);
+        when(orderService.getOrderById(orderId)).thenReturn(responseDTO);
 
         mockMvc.perform(get("/orders/{id}", orderId))
                 .andExpect(status().isOk())

@@ -7,7 +7,10 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.*;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.borders.Border;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
@@ -15,8 +18,8 @@ import reactor.core.scheduler.Schedulers;
 import tn.epac.billingservice.client.OrderClient;
 import tn.epac.billingservice.entity.Invoice;
 import tn.epac.billingservice.repository.InvoiceRepository;
-
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,29 +31,33 @@ public class InvoiceService {
 
     private final OrderClient orderClient;
     private final InvoiceRepository invoiceRepository;
+    private final JavaMailSender mailSender;
 
     public InvoiceService(OrderClient orderClient,
-                          InvoiceRepository invoiceRepository) {
+                          InvoiceRepository invoiceRepository,
+                          JavaMailSender mailSender) {
         this.orderClient = orderClient;
         this.invoiceRepository = invoiceRepository;
+        this.mailSender = mailSender;
     }
+
     public Mono<Invoice> generateInvoice(String orderId) {
         return Mono.fromCallable(() -> {
             if (invoiceRepository.existsByOrderId(orderId)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Invoice already exists");
             }
-            var order = orderClient.getOrderById(orderId).block();  // blocking here
+            var order = orderClient.getOrderById(orderId).block();
             if (order == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found");
             }
-
             Invoice invoice = new Invoice();
             invoice.setOrderId(order.getId());
             invoice.setTotalAmount(order.getTotalAmount());
             invoice.setIssueDate(LocalDate.now());
 
             Invoice saved = invoiceRepository.save(invoice);
-            createPdf(orderId, saved);
+            Path pdfPath = createPdf(orderId, saved);
+            sendInvoiceEmail(order, saved, pdfPath);
             return saved;
         }).subscribeOn(Schedulers.boundedElastic());
     }
@@ -63,25 +70,20 @@ public class InvoiceService {
         return invoiceRepository.findAll();
     }
 
-    private void createPdf(String orderId, Invoice invoice) {
+    private Path createPdf(String orderId, Invoice invoice) {
         try {
             Path dir = Paths.get("invoices");
             Files.createDirectories(dir);
             Path pdfPath = dir.resolve("invoice_" + orderId + ".pdf");
-
             try (PdfWriter writer = new PdfWriter(pdfPath.toString());
                  PdfDocument pdfDoc = new PdfDocument(writer);
                  Document doc = new Document(pdfDoc)) {
-
                 doc.setMargins(40, 40, 40, 40);
                 doc.setFontSize(11);
-
                 Table headerTable = new Table(new float[]{30, 70});
                 headerTable.setWidth(100);
-                // Add company header
                 Paragraph companyHeader = new Paragraph()
                         .add(new Text("EPAC COMPANY\n").setFontSize(16).setBold())
-                        .add(new Text("123 Business Street, Tunis\n").setFontSize(10))
                         .add(new Text("Phone: +216 70 526 370\n").setFontSize(10))
                         .add(new Text("Email: contact@epac.tn\n").setFontSize(10))
                         .add(new Text("VAT: TN12345678\n").setFontSize(10))
@@ -96,12 +98,9 @@ public class InvoiceService {
                         .setMarginBottom(20);
                 doc.add(title);
 
-                // Invoice details
                 Table detailsTable = new Table(new float[]{30, 70});
                 detailsTable.setMarginBottom(20);
-
                 var order = orderClient.getOrderById(orderId).block();
-
                 addDetailRow(detailsTable, "Invoice Number:", invoice.getId().toString());
                 addDetailRow(detailsTable, "Order Number:", invoice.getOrderId());
                 addDetailRow(detailsTable, "Date Issued:", invoice.getIssueDate().toString());
@@ -117,19 +116,18 @@ public class InvoiceService {
                 }
 
                 doc.add(detailsTable);
-
                 Table itemsTable = new Table(new float[]{50, 15, 15, 20});
                 itemsTable.setMarginTop(20);
                 itemsTable.addHeaderCell(createHeaderCell("DESCRIPTION"));
                 itemsTable.addHeaderCell(createHeaderCell("UNIT PRICE (TND)"));
                 itemsTable.addHeaderCell(createHeaderCell("QTY"));
                 itemsTable.addHeaderCell(createHeaderCell("AMOUNT (TND)"));
-                BigDecimal unitPrice = order != null ? order.getTotalAmount().divide(BigDecimal.valueOf(6)) : invoice.getTotalAmount();
+                BigDecimal unitPrice = order != null ?
+                        order.getTotalAmount().divide(BigDecimal.valueOf(6), 2, RoundingMode.HALF_UP) :
+                        invoice.getTotalAmount();
                 int quantity = 6;
                 BigDecimal amount = unitPrice.multiply(BigDecimal.valueOf(quantity));
-
-                addItemRow(itemsTable, "Custom Product/Service",
-                        unitPrice, quantity, amount);
+                addItemRow(itemsTable, "Custom Product/Service", unitPrice, quantity, amount);
                 BigDecimal subtotal = amount;
                 BigDecimal taxRate = new BigDecimal("0.19");
                 BigDecimal taxAmount = subtotal.multiply(taxRate);
@@ -150,11 +148,12 @@ public class InvoiceService {
 
                 Paragraph footer = new Paragraph()
                         .add("\n\nThank you for your business!\n")
-                        .add("EPAC Company - Reg. Code: A123B456 - Tel: +216 70 526 370")
+                        .add("EPAC Company - Tel: +216 70 526 370")
                         .setFontSize(10)
                         .setTextAlignment(TextAlignment.CENTER);
                 doc.add(footer);
 
+                return pdfPath;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -162,6 +161,32 @@ public class InvoiceService {
         }
     }
 
+    private void sendInvoiceEmail(Object order, Invoice invoice, Path pdfPath) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            String recipientEmail = "amenallah.laouini@esprit.tn";
+            helper.setTo(recipientEmail);
+            helper.setSubject("Your Invoice #" + invoice.getId());
+            helper.setFrom("no-reply@epac.tn");
+            helper.setText(
+                    "Dear Customer,\n\n" +
+                            "Thank you for your order! Please find your invoice attached.\n" +
+                            "Invoice Number: " + invoice.getId() + "\n" +
+                            "Order Number: " + invoice.getOrderId() + "\n" +
+                            "Total Amount: " + String.format("%.2f", invoice.getTotalAmount()) + " TND\n\n" +
+                            "Best regards,\nEPAC Company"
+            );
+
+            helper.addAttachment("invoice_" + invoice.getOrderId() + ".pdf", pdfPath.toFile());
+
+            mailSender.send(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to send invoice email");
+        }
+    }
 
     private void addDetailRow(Table table, String label, String value) {
         table.addCell(createCell(label, true));

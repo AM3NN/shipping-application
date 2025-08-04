@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JavaScriptLibraryMappings">
+    <excludedPredefinedLibrary name="shipping application/frontend/node_modules" />
+    <excludedPredefinedLibrary name="shipping application/stage-front/node_modules" />
+  </component>
+</project>

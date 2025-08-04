@@ -23,7 +23,6 @@ export default function OrdersList() {
             const { data } = await axios.get('http://localhost:8081/orders');
             const normalized = Array.isArray(data) ? data : data.content ?? [];
 
-            // Check invoice existence per order in parallel
             const ordersWithInvoiceStatus = await Promise.all(
                 normalized.map(async (order) => {
                     try {

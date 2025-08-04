@@ -50,7 +50,6 @@ public class OrderMapper {
         dto.setTotalCurrency(order.getTotalCurrency());
         dto.setQuantity(order.getQuantity());
         dto.setExpectedDate(order.getExpectedDate());
-
         dto.setPredictedPrice(order.getPredictedPrice());
         dto.setEstimatedFabricationTime(order.getEstimatedFabricationTime());
         return dto;

@@ -16,4 +16,12 @@ public class OrderResponseDTO {
     private String totalCurrency;
     private Double predictedPrice;
     private String estimatedFabricationTime;
+    private Double height;
+    private Double width;
+    private Double thickness;
+    private Double weight;
+    private String reference;
+    private String textPaperType;
+    private String coverFinishType;
+    private String bindingType;
 }

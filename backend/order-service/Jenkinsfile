@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven_3.8.6'
+        jdk 'Java_23'
+    }
+
+    environment {
+        MAVEN_OPTS = '-Dmaven.test.failure.ignore=false'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/AM3NN/shipping-application.git'
+            }
+        }
+
+        stage('Build Order Service') {
+            steps {
+                dir('backend/order-service') {
+                    sh 'mvn clean install'
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                dir('backend/order-service') {
+                    sh 'mvn test'
+                }
+            }
+        }
+
+        stage('Publish Test Results') {
+            steps {
+                junit 'backend/order-service/target/surefire-reports/*.xml'
+            }
+        }
+    }
+}

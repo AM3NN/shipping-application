@@ -9,7 +9,10 @@ import 'primeflex/primeflex.css';
 import Home from './components/Home';
 import OrdersList from './components/OrdersList';
 import ReportsPage from './components/ReportsPage';
-
+import 'leaflet/dist/leaflet.css';
+import 'primereact/resources/themes/lara-light-blue/theme.css';
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
 function App() {
     return (
         <Router>

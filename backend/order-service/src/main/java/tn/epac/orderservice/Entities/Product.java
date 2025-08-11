@@ -45,4 +45,7 @@ public class Product {
     private InventoryStatus inventoryStatus;
 
     private String imageUrl;  // <-- champ ajouté pour l'image
+
+    public Product(@NotEmpty @Size(min = 2, max = 15) String name, float price, int quantity) {
+    }
 }

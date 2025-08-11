@@ -1,0 +1,168 @@
+<div class="card no-padding-card">
+    <p-menubar [model]="nestedMenuItems">
+        <ng-template #end>
+            <p-iconfield>
+                <p-inputicon class="pi pi-search"></p-inputicon>
+                <input type="text" pInputText placeholder="Search" />
+            </p-iconfield>
+        </ng-template>
+    </p-menubar>
+
+    <div class="card noo-padding-card">
+        <div class="button-toolbar">
+            <div class="left-buttons">
+                <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()"></p-button>
+                <p-button label="Delete" icon="pi pi-trash" severity="secondary" outlined (onClick)="deleteSelectedOrders()"></p-button>
+            </div>
+            <div class="right-buttons">
+                <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()"></p-button>
+            </div>
+        </div>
+    </div>
+</div>
+     Tableau des commandes
+    <p-table [value]="orders" selectionMode="single" [(selection)]="selectedOrder">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Status</th>
+                <th>Reference</th>
+                <th>Type</th>
+                <th>Total Amount</th>
+                <th>Actions</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-order>
+            <tr>
+                <td>{{order.status}}</td>
+                <td>{{order.reference}}</td>
+                <td>{{order.type}}</td>
+                <td>{{order.totalAmount | currency: order.totalCurrency}}</td>
+                <td>
+                    <p-button icon="pi pi-pencil" (onClick)="editOrder(order)" class="p-button-text"></p-button>
+                    <p-button icon="pi pi-trash" (onClick)="deleteOrder(order)" class="p-button-text p-button-danger"></p-button>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+
+    <!-- Dialog pour ajouter / modifier une commande -->
+<p-dialog
+    [header]="isEdit ? 'Edit Order' : 'New Order'"
+    [(visible)]="orderDialog"
+    [modal]="true"
+    [style]="{ width: '60vw', maxWidth: '900px' }"
+    [baseZIndex]="10000"
+    [draggable]="false"
+    [resizable]="false"
+    styleClass="p-fluid order-dialog">
+
+    <div class="two-columns">
+        <div>
+            <div class="field">
+                <label>Method</label>
+                <p-dropdown
+                    id="method"
+                    [options]="methodOptions"
+                    [(ngModel)]="order.shippingMethod"
+                    placeholder="Select shipping method"
+                    optionLabel="label"
+                    optionValue="value">
+                </p-dropdown>
+            </div>
+            <div class="field">
+                <label for="shippingLocation">Shipping Location</label>
+                <input id="shippingLocation" type="text" pInputText [(ngModel)]="order.shippingLocation" />
+            </div>
+            <div class="field">
+                <label for="deliveryLocation">Delivery Location</label>
+                <input id="deliveryLocation" type="text" pInputText [(ngModel)]="order.deliveryLocation" />
+            </div>
+        </div>
+
+        <div>
+            <div class="field">
+                <label for="type">Type</label>
+                <p-dropdown
+                    id="type"
+                    [options]="typeOptions"
+                    [(ngModel)]="order.type"
+                    placeholder="Select Type"
+                    optionLabel="label"
+                    optionValue="value">
+                </p-dropdown>
+            </div>
+            <div class="field">
+                <label for="direction">Direction</label>
+                <p-dropdown
+                    id="direction"
+                    [options]="directionOptions"
+                    [(ngModel)]="order.direction"
+                    placeholder="Select Direction"
+                    optionLabel="label"
+                    optionValue="value">
+                </p-dropdown>
+            </div>
+            <div class="field">
+                <label for="expectedDate">Expected Date</label>
+                <p-calendar id="expectedDate" [(ngModel)]="order.expectedDate" dateFormat="yy-mm-dd"></p-calendar>
+            </div>
+        </div>
+    </div>
+
+    <div class="field">
+        <label>Products & Quantities</label>
+        <p-multiSelect
+            [options]="productOptions"
+            [(ngModel)]="selectedProducts"
+            optionLabel="name"
+            optionValue="id"
+            filter="true"
+            placeholder="Select Products"
+            (onChange)="onProductsChange()"
+            display="chip"
+            styleClass="custom-product-select">
+        </p-multiSelect>
+    </div>
+
+    <div class="selected-products-list">
+        <div class="product-item" *ngFor="let prod of order.products; let i = index" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <input type="number"
+                   [(ngModel)]="prod.quantity"
+                   (ngModelChange)="calculateTotals()"
+                   min="1"
+                   class="quantity-input"
+                   [attr.aria-label]="'Quantity for ' + prod.product.name" />
+            <span>{{ prod.product.name }}</span>
+        </div>
+    </div>
+
+
+
+    <div class="three-columns">
+        <div class="field">
+            <label>Net Amount</label>
+            <input type="text" pInputText [(ngModel)]="order.netAmount" disabled />
+        </div>
+        <div class="field">
+            <label>Tax</label>
+            <input type="text" pInputText [(ngModel)]="order.tax" disabled />
+        </div>
+        <div class="field">
+            <label>Total Amount</label>
+            <input type="text" pInputText [(ngModel)]="order.totalAmount" disabled />
+        </div>
+    </div>
+
+
+    <ng-template pTemplate="footer">
+        <p-button label="Cancel" icon="pi pi-times" (onClick)="hideDialog()" class="p-button-text p-button-secondary"></p-button>
+        <p-button label="Save" icon="pi pi-check" (onClick)="saveOrder()" class="p-button-success"></p-button>
+    </ng-template>
+</p-dialog>
+
+
+
+
+
+
+

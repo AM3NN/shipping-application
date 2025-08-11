@@ -16,5 +16,6 @@
 
 <div class="p-card mt-3" *ngIf="agentResponse">
     <p><strong>Réponse de l'IA :</strong></p>
-    <pre>{{ agentResponse }}</pre>
+    <markdown [data]="agentResponse"></markdown>
 </div>
+

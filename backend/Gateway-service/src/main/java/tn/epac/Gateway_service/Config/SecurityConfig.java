@@ -45,9 +45,10 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers("/swagger-ui.html", "/v3/api-docs/**", "/webjars/**",
                                 "/products/v3/api-docs/**", "/user/v3/api-docs/**",
-                                "/shipping/v3/api-docs/**").permitAll()
+                                "/shipping/v3/api-docs/**","/orders/v3/api-docs/**").permitAll()
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/order-service/**").hasAuthority("ROLE_ADMIN")
+                        .pathMatchers("/order-service/**").hasAuthority("ROLE_CLIENT")
                         .pathMatchers("/user-service/**").hasAuthority("ROLE_ADMIN")
                         .pathMatchers("/product-service/**").hasAuthority("ROLE_ADMIN")
                         .pathMatchers("/shipping-service/**").hasAuthority("ROLE_ADMIN")

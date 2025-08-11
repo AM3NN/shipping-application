@@ -1,0 +1,105 @@
+.button-toolbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 0rem 0;
+    border: none;
+    background-color: transparent; /* facultatif, juste pour la clarté */
+}
+
+.left-buttons,
+.right-buttons {
+
+    gap: 0.4rem;
+    padding: 0;
+    margin-left: 0;
+}
+.no-padding-card{
+    padding-bottom: 0.4rem !important; /* Supprime le padding inférieur */
+    margin-bottom: 0 !important;  /* Supprime aussi l’éventuel margin */
+}
+.noo-padding-card{
+    padding-top: 1rem !important; /* Supprime le padding inférieur */
+    padding-bottom: 0.5rem !important;
+}
+
+/* Deux colonnes principales */
+.two-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem; /* espace entre les colonnes */
+}
+
+/* Trois colonnes pour les totaux */
+.three-columns {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+/* Uniformiser les champs */
+.field {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Responsive : sur mobile on revient en 1 colonne */
+@media (max-width: 768px) {
+    .two-columns, .three-columns {
+        grid-template-columns: 1fr;
+    }
+}
+
+.order-dialog .two-columns {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.order-dialog .two-columns > div {
+    flex: 1 1 45%;
+    min-width: 280px;
+}
+
+.selected-products-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 0.5rem;
+    border-radius: 4px;
+    background: #fafafa;
+}
+
+.product-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.product-name {
+    flex-grow: 1;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.quantity-input {
+    width: 5rem;
+}
+
+.three-columns {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+}
+
+.three-columns > .field {
+    flex: 1 1 30%;
+    min-width: 150px;
+}

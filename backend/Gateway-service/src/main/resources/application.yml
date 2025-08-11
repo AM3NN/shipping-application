@@ -24,7 +24,7 @@ spring:
             - id: order-service
               uri: lb://ORDER-SERVICE
               predicates:
-                - Path=/orders/**
+                - Path=/order-service/**
             - id: user-service
               uri: lb://USER-SERVICE
               predicates:
@@ -49,6 +49,10 @@ spring:
               uri: lb://SHIPPING-SERVICE
               predicates:
                 - Path=/shipping/v3/api-docs
+            - id: order-service-swagger
+              uri: lb://ORDER-SERVICE
+              predicates:
+                - Path=/orders/v3/api-docs
           discovery:
             locator:
               enabled: false
@@ -77,14 +81,15 @@ springdoc:
     urls:
       - name: gateway
         url: /v3/api-docs
-      - name: order-service
-        url: /orders/v3/api-docs
       - name: user-service
         url: /user/v3/api-docs
       - name: product-service
         url: /products/v3/api-docs
       - name: shipping-service
         url: /shipping/v3/api-docs
+      - name: order-service
+        url: /orders/v3/api-docs
+
   api-docs:
     path: /v3/api-docs
   show-actuator: true

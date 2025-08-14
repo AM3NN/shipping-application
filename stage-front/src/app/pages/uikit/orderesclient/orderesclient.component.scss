@@ -103,3 +103,68 @@
     flex: 1 1 30%;
     min-width: 150px;
 }
+
+/* Cartes custom products */
+.custom-detail-card {
+    border: 1px solid rgba(204, 204, 204, 0.22);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: #f9f9f9;
+    box-shadow: 1px 1px 5px rgba(0,0,0,0.05);
+}
+
+/* Conteneur deux colonnes pour fields */
+.custom-detail-card .fields-two-columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.custom-detail-card .fields-two-columns > .field {
+    flex: 1 1 48%; /* deux colonnes égales */
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.custom-detail-card h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Champs full width */
+.custom-detail-card input[pInputText],
+.custom-detail-card p-dropdown,
+.custom-detail-card p-inputNumber {
+    width: 100%;
+}
+
+/* Trois colonnes pour les totaux */
+.three-columns {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+}
+
+.three-columns > .field {
+    flex: 1 1 30%;
+    min-width: 150px;
+}
+
+/* Boutons */
+.order-dialog p-button {
+    margin-right: 0.5rem;
+}
+
+/* Inputs & dropdowns full width */
+.order-dialog input[pInputText],
+.order-dialog p-dropdown,
+.order-dialog p-inputNumber,
+.order-dialog p-calendar,
+.order-dialog p-multiSelect {
+    width: 100%;
+}

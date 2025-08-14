@@ -4,6 +4,11 @@ import {
 } from "./chunk-22JQBFFO.js";
 import "./chunk-5G7WYC4N.js";
 import {
+  Router,
+  RouterLink,
+  RouterModule
+} from "./chunk-3VE6XEXP.js";
+import {
   ChevronRightIcon,
   HomeIcon
 } from "./chunk-RZ7LUWUU.js";
@@ -20,11 +25,6 @@ import {
   SharedModule
 } from "./chunk-TLEJQAJD.js";
 import "./chunk-GFVF2TMO.js";
-import {
-  Router,
-  RouterLink,
-  RouterModule
-} from "./chunk-3VE6XEXP.js";
 import "./chunk-US7LRVFB.js";
 import "./chunk-PXYLXCRT.js";
 import "./chunk-EXHYTUTQ.js";

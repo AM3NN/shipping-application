@@ -11,7 +11,7 @@
     <div class="card noo-padding-card">
         <div class="button-toolbar">
             <div class="left-buttons">
-                <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()"></p-button>
+                <p-button label="New order" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()"></p-button>
                 <p-button label="Delete" icon="pi pi-trash" severity="secondary" outlined (onClick)="deleteSelectedOrders()"></p-button>
             </div>
             <div class="right-buttons">
@@ -50,7 +50,7 @@
     [header]="isEdit ? 'Edit Order' : 'New Order'"
     [(visible)]="orderDialog"
     [modal]="true"
-    [style]="{ width: '60vw', maxWidth: '900px' }"
+    [style]="{ width: '67vw', maxWidth: '950px' }"
     [baseZIndex]="10000"
     [draggable]="false"
     [resizable]="false"
@@ -138,6 +138,131 @@
 
 
 
+
+    <div class="mb-2">
+        <p-button label="Add  a custom product" icon="pi pi-plus" (onClick)="addCustomProduct()"></p-button>
+    </div>
+
+    <div *ngFor="let detail of customproducts; let i = index" class="custom-detail-card">
+        <h4>Detail {{ i + 1 }}</h4>
+
+        <div class="fields-two-columns">
+            <div class="field">
+                <label>Binding Type</label>
+                <p-dropdown
+                    [options]="bindingTypeOptions"
+                    [(ngModel)]="detail.bindingType"
+                    placeholder="Select Binding Type">
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Quantity</label>
+                <p-inputNumber [(ngModel)]="detail.quantity" [min]="1"></p-inputNumber>
+            </div>
+
+            <div class="field">
+                <label>Perforation</label>
+                <p-dropdown
+                    [options]="binaryOptions"
+                    [(ngModel)]="detail.perf"
+                    placeholder="True or false">
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Security Label</label>
+                <p-dropdown
+                    [options]="binaryOptions"
+                    [(ngModel)]="detail.securityLabel"
+                    placeholder="True or false"
+                   >
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Shrinkwrap</label>
+                <p-dropdown
+                    [options]="binaryOptions"
+                    [(ngModel)]="detail.shrinkwrap"
+                    placeholder="True or false">
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Three Hole Drill</label>
+                <p-dropdown
+                    [options]="binaryOptions"
+                    [(ngModel)]="detail.threeHoleDrill"
+                    placeholder="True or false">
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Cover Finish Type</label>
+                <p-dropdown
+                    [options]="coverFinishTypeOptions"
+                    [(ngModel)]="detail.coverFinishType"
+                    placeholder="Select Cover Finish">
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Text Color</label>
+                <p-dropdown
+                    [options]="textColorOptions"
+                    [(ngModel)]="detail.textColor"
+                    placeholder="Select Text Color">
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Siren</label>
+                <p-dropdown
+                    [options]="sirenOptions"
+                    [(ngModel)]="detail.siren"
+                    placeholder="Select Siren">
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Text Paper Type</label>
+                <p-dropdown
+                    [options]="textPaperTypeOptions"
+                    [(ngModel)]="detail.textPaperType"
+                    placeholder="Select Paper Type">
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Production Page</label>
+                <p-inputNumber [(ngModel)]="detail.productionPage" [min]="0"></p-inputNumber>
+            </div>
+
+            <div class="field">
+                <label>Thickness (mm)</label>
+                <p-inputNumber [(ngModel)]="detail.thickness" [min]="0"></p-inputNumber>
+            </div>
+
+            <div class="field">
+                <label>Height (mm)</label>
+                <p-inputNumber [(ngModel)]="detail.height" [min]="0"></p-inputNumber>
+            </div>
+
+            <div class="field">
+                <label>Width (mm)</label>
+                <p-inputNumber [(ngModel)]="detail.width" [min]="0"></p-inputNumber>
+            </div>
+
+            <div class="field">
+                <label>Weight (g)</label>
+                <p-inputNumber [(ngModel)]="detail.weight" [min]="0"></p-inputNumber>
+            </div>
+        </div>
+
+        <p-button label="Remove" icon="pi pi-trash" severity="danger" (onClick)="removeCustomProduct(i)"></p-button>
+    </div>
+
     <div class="three-columns">
         <div class="field">
             <label>Net Amount</label>
@@ -154,11 +279,14 @@
     </div>
 
 
+
     <ng-template pTemplate="footer">
         <p-button label="Cancel" icon="pi pi-times" (onClick)="hideDialog()" class="p-button-text p-button-secondary"></p-button>
         <p-button label="Save" icon="pi pi-check" (onClick)="saveOrder()" class="p-button-success"></p-button>
     </ng-template>
 </p-dialog>
+
+
 
 
 

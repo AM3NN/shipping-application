@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OrderDetailDTO {
     private Long id;
-    private String partId;
     private String bindingType;
     private String partStatus;
     private String securityLabel;
@@ -25,4 +24,5 @@ public class OrderDetailDTO {
     private String coverFinishType;
     private String textColor;
     private String siren;
+    int quantity;
 }

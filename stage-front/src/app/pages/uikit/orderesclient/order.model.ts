@@ -4,10 +4,28 @@ export interface OrderProduct {
     product: Product;
     quantity: number;
 }
+export interface OrderDetail {
+    id?: string;
+    bindingType: string;
+    partStatus: string;
+    securityLabel: boolean; // reste String
+    shrinkwrap: boolean;   // changer String → boolean
+    threeHoleDrill: boolean; // idem
+    perf: boolean; // "0" or "1"
+    productionPage: number;
+    thickness: number;
+    height: number;
+    width: number;
+    weight: number;
+    textPaperType: string;
+    coverFinishType: string;
+    textColor: string;
+    siren: string;
+    quantity: number;
+}
 
 export interface Order {
     id?: string;
-
     status?: string;
     shippingMethod: string;
     shippingLocation: string;
@@ -32,4 +50,9 @@ export interface Order {
     clientId: string;
 
     products: OrderProduct[];
+    customproductsids: string[];
+}
+export interface OrderWithDetailsRequest {
+    order: Order;
+    customproducts: OrderDetail[];
 }

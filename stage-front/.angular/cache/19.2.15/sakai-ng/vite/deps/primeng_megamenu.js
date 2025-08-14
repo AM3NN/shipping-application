@@ -3,13 +3,18 @@ import {
   BadgeModule
 } from "./chunk-RGXLKFHC.js";
 import {
-  Ripple
-} from "./chunk-TNUYXRWZ.js";
-import {
   Tooltip,
   TooltipModule
 } from "./chunk-22JQBFFO.js";
 import "./chunk-5G7WYC4N.js";
+import {
+  RouterLink,
+  RouterLinkActive,
+  RouterModule
+} from "./chunk-3VE6XEXP.js";
+import {
+  Ripple
+} from "./chunk-TNUYXRWZ.js";
 import {
   AngleDownIcon,
   AngleRightIcon,
@@ -35,11 +40,6 @@ import {
   isTouchDevice,
   uuid
 } from "./chunk-GFVF2TMO.js";
-import {
-  RouterLink,
-  RouterLinkActive,
-  RouterModule
-} from "./chunk-3VE6XEXP.js";
 import "./chunk-US7LRVFB.js";
 import {
   findLastIndex,

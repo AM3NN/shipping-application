@@ -9,17 +9,16 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "orders")
+@Document(collection = "customorders")
 public class OrderDetail {
     @Id
-    Long id;
-    String partId;
+    String id;
     String bindingType;
     String partStatus;
-    String securityLabel;
+    Boolean securityLabel;
     Boolean shrinkwrap;
     Boolean threeHoleDrill;
-    String perf;
+    Boolean perf;
     Integer productionPage;
     Double thickness;
     Double height;
@@ -29,4 +28,5 @@ public class OrderDetail {
     String coverFinishType;
     String textColor;
     String siren;
+    int quantity;
 }

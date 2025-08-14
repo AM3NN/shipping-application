@@ -16,11 +16,11 @@ import {
   find,
   uuid
 } from "./chunk-GFVF2TMO.js";
-import "./chunk-O4QYUEGA.js";
 import "./chunk-US7LRVFB.js";
 import {
   findIndexInList
 } from "./chunk-PXYLXCRT.js";
+import "./chunk-O4QYUEGA.js";
 import {
   animate,
   state,

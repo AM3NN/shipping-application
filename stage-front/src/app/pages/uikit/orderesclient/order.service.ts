@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import {Observable, from, throwError, tap} from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
-import { Order } from './order.model';
+import {Order, OrderWithDetailsRequest} from './order.model';
 import { KeycloakService } from 'keycloak-angular';
 import {InventoryWithWarehouseDTO} from "../product/inventory.model";
 
@@ -42,13 +42,15 @@ export class OrderService {
     }
 
 
-    creategenOrder(order: Order): Observable<Order> {
+
+    createOrder(payload: OrderWithDetailsRequest): Observable<Order> {
         return this.getHeaders().pipe(
             switchMap(headers =>
                 from(this.keycloakService.loadUserProfile()).pipe(
                     switchMap(profile => {
-                        order.clientId = profile.id ?? '';
-                        return this.http.post<Order>(`${this.baseUrl}/GeneralOrder`, order, {
+                        payload.order.clientId = profile.id ?? '';
+
+                        return this.http.post<Order>(`${this.baseUrl}`, payload, {
                             headers,
                             withCredentials: true
                         }).pipe(
@@ -63,6 +65,7 @@ export class OrderService {
             })
         );
     }
+
 
     updateOrder(order: Order): Observable<Order> {
         return this.getHeaders().pipe(

@@ -1,4 +1,4 @@
-import { ApplicationConfig, importProvidersFrom, SecurityContext } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom, SecurityContext, APP_INITIALIZER } from '@angular/core';
 import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -6,7 +6,6 @@ import { appRoutes } from './app.routes';
 import { KeycloakAngularModule, KeycloakService } from 'keycloak-angular';
 import { initializeKeycloak } from '../keycloak-init';
 import { MarkdownModule, MarkdownService } from 'ngx-markdown';
-import { DomSanitizer } from '@angular/platform-browser';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -18,7 +17,7 @@ export const appConfig: ApplicationConfig = {
         provideHttpClient(),
         importProvidersFrom(BrowserAnimationsModule, KeycloakAngularModule, MarkdownModule.forRoot()),
         {
-            provide: 'APP_INITIALIZER',
+            provide: APP_INITIALIZER, // ✅ ici c'est la constante, pas une string
             useFactory: initializeKeycloak,
             deps: [KeycloakService],
             multi: true,
@@ -26,8 +25,7 @@ export const appConfig: ApplicationConfig = {
         MarkdownService,
         {
             provide: SecurityContext,
-            useValue: SecurityContext.HTML // Provide SecurityContext globally
+            useValue: SecurityContext.HTML
         },
-
     ]
 };

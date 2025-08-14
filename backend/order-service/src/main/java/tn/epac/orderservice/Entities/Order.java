@@ -19,7 +19,6 @@ public class Order {
 
     @Id
     private String id;
-
     private String status;
     private String shippingMethod;
     private String shippingLocation;
@@ -40,9 +39,9 @@ public class Order {
     private String taxCurrency;
     private BigDecimal totalAmount;
     private String totalCurrency;
-
     private String clientId;
-
     // Liste des produits de la commande
     private List<OrderProduct> products;
+
+    private List<String> customproductsids;
 }

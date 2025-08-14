@@ -3,6 +3,7 @@ package tn.epac.orderservice.DTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tn.epac.orderservice.Entities.OrderDetail;
 import tn.epac.orderservice.Entities.OrderProduct;
 
 import java.math.BigDecimal;
@@ -34,8 +35,8 @@ public class OrderDTO {
     private String taxCurrency;
     private BigDecimal totalAmount;
     private String totalCurrency;
-    private OrderDetailDTO details;
     private String clientId;
     // Liste des produits de la commande
     private List<OrderProductDTO> products;
+    private List<OrderDetailDTO> customproducts;
 }

@@ -5,11 +5,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import tn.epac.orderservice.DTO.OrderDTO;
 import tn.epac.orderservice.Entities.Order;
+import tn.epac.orderservice.Entities.OrderDetail;
 import tn.epac.orderservice.Entities.OrderProduct;
-import tn.epac.orderservice.Entities.Product;
 import tn.epac.orderservice.Repository.OrderRepository;
+import tn.epac.orderservice.Repository.OrderdetailRepository;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 @Service
@@ -19,16 +21,18 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final ModelMapper modelMapper;
     private final SequenceGeneratorService sequenceGenerator;
+private  final OrderdetailRepository orderDetailRepository;
+
+
     @Override
-    public OrderDTO createOrder(OrderDTO orderDTO) {
-        Order order = modelMapper.map(orderDTO, Order.class);
-        order.setCreatedDate(LocalDate.now());
-        return modelMapper.map(orderRepository.save(order), OrderDTO.class);
+    public Order createOrder(Order orderDTO) {
+        orderDTO.setCreatedDate(LocalDate.now());
+        return orderRepository.save(orderDTO);
     }
 
     @Override
-    public OrderDTO creategeneralOrder(OrderDTO orderDTO) {
-        Order order = modelMapper.map(orderDTO, Order.class);
+    public Order creategeneralOrder(Order order) {
+
 
         order.setCreatedDate(LocalDate.now());
 
@@ -49,7 +53,7 @@ public class OrderServiceImpl implements OrderService {
                 );
         }
         }
-        return modelMapper.map(orderRepository.save(order), OrderDTO.class);
+        return orderRepository.save(order);
     }
 
 
@@ -77,5 +81,18 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void deleteOrder(String id) {
         orderRepository.deleteById(id);
+    }
+    @Override
+    public Order createOrder(Order order, List<OrderDetail> customproducts) {
+        // Save OrderDetails and collect IDs
+        List<String> customProductIds = new ArrayList<>();
+        for (OrderDetail detail : customproducts) {
+            OrderDetail savedDetail = orderDetailRepository.save(detail);
+            customProductIds.add(savedDetail.getId());
+        }
+
+        // Assign IDs to Order
+        order.setCustomproductsids(customProductIds);
+        return orderRepository.save(order);
     }
 }

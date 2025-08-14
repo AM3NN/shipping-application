@@ -3,13 +3,17 @@ import {
   BadgeModule
 } from "./chunk-RGXLKFHC.js";
 import {
-  Ripple
-} from "./chunk-TNUYXRWZ.js";
-import {
   Tooltip,
   TooltipModule
 } from "./chunk-22JQBFFO.js";
 import "./chunk-5G7WYC4N.js";
+import {
+  RouterLink,
+  RouterModule
+} from "./chunk-3VE6XEXP.js";
+import {
+  Ripple
+} from "./chunk-TNUYXRWZ.js";
 import {
   AngleRightIcon
 } from "./chunk-RZ7LUWUU.js";
@@ -43,11 +47,6 @@ import {
   removeChild,
   uuid
 } from "./chunk-GFVF2TMO.js";
-import {
-  RouterLink,
-  RouterModule
-} from "./chunk-3VE6XEXP.js";
-import "./chunk-O4QYUEGA.js";
 import "./chunk-US7LRVFB.js";
 import {
   findLastIndex,
@@ -56,6 +55,7 @@ import {
   isPrintableCharacter,
   resolve
 } from "./chunk-PXYLXCRT.js";
+import "./chunk-O4QYUEGA.js";
 import {
   animate,
   style,

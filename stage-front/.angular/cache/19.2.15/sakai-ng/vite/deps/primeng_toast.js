@@ -24,11 +24,11 @@ import {
   setAttribute,
   uuid
 } from "./chunk-GFVF2TMO.js";
-import "./chunk-O4QYUEGA.js";
 import "./chunk-US7LRVFB.js";
 import {
   isEmpty
 } from "./chunk-PXYLXCRT.js";
+import "./chunk-O4QYUEGA.js";
 import {
   animate,
   animateChild,

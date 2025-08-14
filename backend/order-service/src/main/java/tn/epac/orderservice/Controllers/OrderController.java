@@ -9,6 +9,8 @@ import reactor.core.publisher.Flux;
 import tn.epac.orderservice.DTO.OrderDTO;
 //import tn.epac.orderservice.Services.ChatService;
 //import tn.epac.orderservice.Services.ChatbotService;
+import tn.epac.orderservice.Entities.Order;
+import tn.epac.orderservice.Entities.OrderDetail;
 import tn.epac.orderservice.Services.OrderService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.ai.chat.messages.Message;
@@ -26,14 +28,10 @@ public class OrderController {
 //    private final ChatService chatService;
 //    private final ChatbotService chatbotService;
 
-    @PostMapping
-    public ResponseEntity<OrderDTO> create(@RequestBody OrderDTO dto) {
-        return new ResponseEntity<>(orderService.createOrder(dto), HttpStatus.CREATED);
-    }
 
     @PostMapping("/GeneralOrder")
-    public ResponseEntity<OrderDTO> createOrder(@Valid @RequestBody OrderDTO dto) {
-        OrderDTO savedOrder = orderService.creategeneralOrder(dto);
+    public ResponseEntity<Order> createOrder(@Valid @RequestBody Order dto) {
+        Order savedOrder = orderService.creategeneralOrder(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedOrder);
     }
 
@@ -73,5 +71,33 @@ public class OrderController {
     public ResponseEntity<Void> delete(@PathVariable String id) {
         orderService.deleteOrder(id);
         return ResponseEntity.noContent().build();
+    }
+    @PostMapping
+    public Order createOrder(@RequestBody OrderWithDetailsRequest request) {
+        Order order = request.getOrder();
+        List<OrderDetail> customProducts = request.getCustomproducts();
+        return orderService.createOrder(order, customProducts);
+    }
+
+    // DTO pour recevoir JSON Order + Liste OrderDetail
+    public static class OrderWithDetailsRequest {
+        private Order order;
+        private List<OrderDetail> customproducts;
+
+        public Order getOrder() {
+            return order;
+        }
+
+        public void setOrder(Order order) {
+            this.order = order;
+        }
+
+        public List<OrderDetail> getCustomproducts() {
+            return customproducts;
+        }
+
+        public void setCustomproducts(List<OrderDetail> customproducts) {
+            this.customproducts = customproducts;
+        }
     }
 }

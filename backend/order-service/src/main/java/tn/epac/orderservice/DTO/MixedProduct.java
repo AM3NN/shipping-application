@@ -1,0 +1,15 @@
+package tn.epac.orderservice.DTO;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class MixedProduct {
+    String id;
+    String Reference;
+    int quantity;
+
+}

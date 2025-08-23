@@ -1,0 +1,109 @@
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+    </ng-template>
+</p-toolbar>
+
+<p-table
+    #dt
+    [value]="products()"
+    [rows]="10"
+    [paginator]="true"
+    [globalFilterFields]="['reference', 'name', 'category', 'version', 'inventoryStatus']"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [(selection)]="selectedProducts"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[10, 20, 30]"
+>
+    <ng-template pTemplate="caption">
+        <div class="flex items-center justify-between">
+            <h5 class="m-0">Products</h5>
+            <p-iconfield>
+                <p-inputicon styleClass="pi pi-search" />
+                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+            </p-iconfield>
+        </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+        <tr>
+
+            <th pSortableColumn="reference" style="min-width: 10rem">
+                Reference
+                <p-sortIcon field="reference" />
+            </th>
+            <th pSortableColumn="name" style="min-width: 10rem">
+                Name
+                <p-sortIcon field="name" />
+            </th>
+            <th style="min-width: 8rem">Image</th>
+            <th style="min-width: 15rem">Description</th>
+            <th pSortableColumn="type" style="min-width: 12rem">
+                Type
+                <p-sortIcon field="type" />
+            </th>
+            <th pSortableColumn="version" style="min-width: 10rem">
+                Version
+                <p-sortIcon field="version" />
+            </th>
+            <th pSortableColumn="price" style="min-width: 8rem">
+                Price
+                <p-sortIcon field="price" />
+            </th>
+            <th pSortableColumn="quantity" style="min-width: 8rem">
+                Quantity
+                <p-sortIcon field="quantity" />
+            </th>
+            <th pSortableColumn="category" style="min-width: 12rem">
+                Category
+                <p-sortIcon field="category" />
+            </th>
+            <th pSortableColumn="inventoryStatus" style="min-width: 12rem">
+                Status
+                <p-sortIcon field="inventoryStatus" />
+            </th>
+
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-product>
+        <tr>
+
+            <td style="min-width: 10rem">{{ product.reference }}</td>
+            <td style="min-width: 10rem">{{ product.name }}</td>
+            <td style="min-width: 8rem">
+                <img
+                    [src]="'http://localhost:8082' + product.imageUrl"
+                    [alt]="product.name"
+                    style="width: 48px; height: 48px;"
+                    class="rounded"
+                    *ngIf="product.imageUrl; else noImage"
+                />
+                <ng-template #noImage>
+                    <span>-</span>
+                </ng-template>
+            </td>
+            <td style="min-width: 15rem">{{ product.description }}</td>
+            <td style="min-width: 12rem">{{ product.type }}</td>
+            <td style="min-width: 10rem">{{ product.version }}</td>
+            <td style="min-width: 8rem">{{ product.price | currency: 'USD' }}</td>
+            <td style="min-width: 8rem">{{ product.quantity }}</td>
+            <td style="min-width: 12rem">{{ product.category }}</td>
+            <td style="min-width: 12rem">
+                <p-tag [value]="product.inventoryStatus" [severity]="getSeverity(product.inventoryStatus)"></p-tag>
+            </td>
+
+
+        </tr>
+    </ng-template>
+</p-table>
+
+
+
+
+

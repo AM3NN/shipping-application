@@ -8,21 +8,22 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderDetailDTO {
-    private Long id;
-    private String bindingType;
-    private String partStatus;
-    private String securityLabel;
-    private Boolean shrinkwrap;
-    private Boolean threeHoleDrill;
-    private String perf;
-    private Integer productionPage;
-    private Double thickness;
-    private Double height;
-    private Double width;
-    private Double weight;
-    private String textPaperType;
-    private String coverFinishType;
-    private String textColor;
-    private String siren;
+    String id;
+    String Reference;
+    String bindingType;
+    String partStatus;
+    Boolean securityLabel;
+    Boolean shrinkwrap;
+    Boolean threeHoleDrill;
+    Boolean perf;
+    Integer productionPage;
+    Double thickness;
+    Double height;
+    Double width;
+    Double weight;
+    String textPaperType;
+    String coverFinishType;
+    String textColor;
+    String siren;
     int quantity;
 }

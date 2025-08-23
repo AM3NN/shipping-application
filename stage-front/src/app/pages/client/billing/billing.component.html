@@ -1,0 +1,177 @@
+<div class="invoice-cards-container p-grid p-nogutter p-justify-between">
+    <!-- Total Invoices -->
+    <div class="grid grid-cols-12 gap-8">
+        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+        <p-card class="stat-card mb-0">
+            <div class="flex justify-between mb-4">
+                <div>
+                    <span class="text-muted block mb-2">Total Invoices</span>
+                    <div class="text-surface font-medium text-xl">{{ totalInvoices }}</div>
+                </div>
+                <div class="flex items-center justify-center bg-gray-100 rounded-circle" style="width: 2.5rem; height: 2.5rem">
+                    <i class="pi pi-file text-gray-500 text-xl"></i>
+                </div>
+            </div>
+            <span class="text-primary font-medium">24 new</span>
+            <span class="text-muted">since last visit</span>
+        </p-card>
+    </div>
+
+    <!-- Paid -->
+        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+        <p-card class="stat-card mb-0">
+            <div class="flex justify-between mb-4">
+                <div>
+                    <span class="text-muted block mb-2">Paid</span>
+                    <div class="text-surface font-medium text-xl">{{ totalPaid }} ({{ totalPaidAmount | currency:'USD' }})</div>
+                </div>
+                <div class="flex items-center justify-center bg-blue-100 rounded-circle" style="width: 2.5rem; height: 2.5rem">
+                    <i class="pi pi-check-circle text-blue-500 text-xl"></i>
+                </div>
+            </div>
+            <span class="text-primary font-medium">52%+</span>
+            <span class="text-muted">since last week</span>
+        </p-card>
+    </div>
+
+    <!-- Unpaid -->
+        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+        <p-card class="stat-card mb-0">
+            <div class="flex justify-between mb-4">
+                <div>
+                    <span class="text-muted block mb-2">Unpaid</span>
+                    <div class="text-surface font-medium text-xl">{{ totalUnpaid }} ({{ totalUnpaidAmount | currency:'USD' }})</div>
+                </div>
+                <div class="flex items-center justify-center bg-red-100 rounded-circle" style="width: 2.5rem; height: 2.5rem">
+                    <i class="pi pi-times-circle text-red-500 text-xl"></i>
+                </div>
+            </div>
+            <span class="text-primary font-medium">10</span>
+            <span class="text-muted">overdue</span>
+        </p-card>
+    </div>
+
+    <!-- Total Amount -->
+        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+        <p-card class="stat-card mb-0">
+            <div class="flex justify-between mb-4">
+                <div>
+                    <span class="text-muted block mb-2">Total Amount</span>
+                    <div class="text-surface font-medium text-xl">{{ totalAmount | currency:'USD' }}</div>
+                </div>
+                <div class="flex items-center justify-center bg-orange-100 rounded-circle" style="width: 2.5rem; height: 2.5rem">
+                    <i class="pi pi-dollar text-orange-500 text-xl"></i>
+                </div>
+            </div>
+            <span class="text-primary font-medium">5 new</span>
+            <span class="text-muted">since last month</span>
+        </p-card>
+    </div>
+</div>
+
+</div>
+  <br>
+
+
+
+<p-table
+    [value]="invoices"
+    [paginator]="true"
+    [rows]="10"
+    [loading]="loading"
+    sortMode="multiple"
+    responsiveLayout="scroll"
+    class="p-datatable-gridlines">
+
+    <ng-template pTemplate="header">
+        <tr>
+            <th pSortableColumn="orderId">Order Ref <p-sortIcon field="orderId"></p-sortIcon></th>
+            <th pSortableColumn="totalAmount">Amount <p-sortIcon field="totalAmount"></p-sortIcon></th>
+            <th pSortableColumn="issueDate">Issue Date <p-sortIcon field="issueDate"></p-sortIcon></th>
+            <th>Sent</th>
+            <th>Paid</th>
+            <th>Actions</th>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-invoice>
+        <tr>
+            <td>{{ invoice.orderRef }}</td>
+            <td>{{ invoice.totalAmount | currency:'USD' }}</td>
+            <td>{{ invoice.issueDate | date }}</td>
+            <td>
+                <p-tag [value]="invoice.sent ? 'Yes' : 'No'" [severity]="invoice.sent ? 'success' : 'warning'"></p-tag>
+            </td>
+            <td>
+                <p-tag [value]="invoice.paid ? 'Paid' : 'Unpaid'" [severity]="invoice.paid ? 'success' : 'danger'"></p-tag>
+            </td>
+            <td>
+                <button pButton type="button" icon="pi pi-eye" class="p-button-text p-mr-2" (click)="viewInvoice(invoice)"></button>
+                <button pButton type="button" icon="pi pi-download" class="p-button-text p-mr-2" (click)="downloadInvoice(invoice.id)"></button>
+                <button pButton type="button" icon="pi pi-credit-card" class="p-button-text"
+                        (click)="showStripeDialog(invoice)" [disabled]="invoice.paid"></button>
+            </td>
+        </tr>
+    </ng-template>
+</p-table>
+
+<!-- Dialog PrimeNG pour Stripe -->
+<p-dialog header="Stripe Payment" [(visible)]="showCardForm"
+          [modal]="true" [closable]="true" [responsive]="true"
+          [style]="{width: '600px'}" (onHide)="closeStripeForm()"
+          [baseZIndex]="10000" class="stripe-dialog">
+
+    <div *ngIf="selectedInvoice" class="stripe-container">
+
+        <!-- Invoice Summary -->
+        <h4 class="mb-3">Invoice: {{ selectedInvoice.orderRef }}</h4>
+        <p><b>Customer:</b> {{ selectedInvoice.customerName }} ({{ selectedInvoice.customerEmail }})</p>
+        <p><b>Issue Date:</b> {{ selectedInvoice.issueDate | date:'shortDate' }}</p>
+        <p><b>Due Date:</b> {{ selectedInvoice.dueDate | date:'shortDate' }}</p>
+        <p><b>Status:</b>
+            <span [ngClass]="{
+        'text-green-600': selectedInvoice.status === 'Paid',
+        'text-red-600': selectedInvoice.status === 'Overdue',
+        'text-yellow-600': selectedInvoice.status === 'Sent'
+      }">{{ selectedInvoice.status }}</span>
+        </p>
+
+        <!-- Items Table -->
+        <p-table [value]="selectedInvoice.items" class="mb-4">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item>
+                <tr>
+                    <td>{{ item.productName }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.unitPrice | currency:selectedInvoice.currency }}</td>
+                    <td>{{ item.totalPrice | currency:selectedInvoice.currency }}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+
+        <!-- Totals -->
+        <div class="invoice-summary">
+            <p><b>Net Amount:</b> {{ selectedInvoice.netAmount | currency:selectedInvoice.currency }}</p>
+            <p><b>Tax:</b> {{ selectedInvoice.tax | currency:selectedInvoice.currency }}</p>
+            <p *ngIf="selectedInvoice.discount > 0"><b>Discount:</b> -{{ selectedInvoice.discount | currency:selectedInvoice.currency }}</p>
+            <p class="font-bold text-lg">Grand Total: {{ selectedInvoice.totalAmount | currency:selectedInvoice.currency }}</p>
+        </div>
+
+        <!-- Stripe Form -->
+        <div id="card-element" class="stripe-card mt-4"></div>
+        <div id="card-errors" role="alert" class="stripe-errors"></div>
+        <button pButton type="button" label="Confirm Payment"
+                class="stripe-pay-btn mt-3"
+                (click)="payInvoice(selectedInvoice)">
+        </button>
+    </div>
+</p-dialog>
+
+

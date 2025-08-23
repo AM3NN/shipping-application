@@ -150,10 +150,16 @@
             <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-ollama-spring-boot-starter</artifactId>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>4.17.0</version> <!-- ou dernière version -->
         </dependency>
 
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.springframework.ai/spring-ai-vertex-ai-gemini-spring-boot-starter -->
         <dependency>
@@ -172,6 +178,17 @@
             <artifactId>resilience4j-spring-boot3</artifactId>
             <version>2.0.2</version>  <!-- Vérifie la dernière version sur Maven Central -->
         </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.15.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>5.9</version>
+        </dependency>
+
     </dependencies>
 
     <repositories>

@@ -25,7 +25,8 @@ export class AppMenu {
                 items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/'] },
                     { label: 'Products', icon: 'pi pi-book', routerLink: ['/uikit/product'] },
                     { label: 'Warehouses', icon: 'pi pi-building', routerLink: ['/uikit/warehouse'] },
-                    { label: 'My Orders', icon: 'pi pi-shopping-cart', routerLink: ['/uikit/Myorders'] }]
+                    { label: 'My Orders', icon: 'pi pi-shopping-cart', routerLink: ['/uikit/test'] },
+                    { label: 'Scrapped Products', icon: 'pi pi-shopping-cart', routerLink: ['/uikit/csv'] }]
             },
             {
                 label: 'UI Components',

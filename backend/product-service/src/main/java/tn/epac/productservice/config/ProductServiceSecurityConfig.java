@@ -39,7 +39,6 @@ public class ProductServiceSecurityConfig {
                                 "/products/v3/api-docs/**",
                                 "/webjars/**","/uploads/**"
                         ).permitAll()
-                        .requestMatchers("/api/products").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

@@ -1,0 +1,99 @@
+<div class="custom-products-table">
+    <p-toolbar styleClass="mb-6">
+        <ng-template #start>
+            <div class="custom-header flex align-items-center justify-content-between p-2">
+                <h5 class="m-0 custom-title">Custom Products</h5>
+                <div class="button-group">
+                    <p-button
+                        label="Production Available Products"
+                        severity="secondary"
+                        class="ml-4 custom-button"
+                        [routerLink]="['/client/products']"
+                    ></p-button>
+                    <p-button
+                        label="Custom Product"
+                        icon="pi pi-plus-circle"
+                        severity="secondary"
+                        class="ml-2 "
+                        (onClick)="addCustomProduct()"
+                    ></p-button>
+                </div>
+            </div>
+        </ng-template>
+
+
+        <ng-template #end>
+            <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+        </ng-template>
+    </p-toolbar>
+
+    <div class="p-table-wrapper">
+        <p-table
+            #dt
+            [value]="customProducts"
+            [rows]="10"
+            [paginator]="true"
+            [globalFilterFields]="[
+        'bindingType', 'partStatus', 'securityLabel', 'shrinkwrap',
+        'threeHoleDrill', 'perf', 'textPaperType', 'coverFinishType'
+      ]"
+            [rowHover]="true"
+            dataKey="id"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+            [showCurrentPageReport]="true"
+            [rowsPerPageOptions]="[10, 20, 30]"
+            styleClass="p-datatable-sm"
+        >
+            <ng-template pTemplate="caption">
+                <div class="flex items-center justify-between">
+                    <p-iconfield>
+                        <p-inputicon styleClass="pi pi-search" />
+                        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+                    </p-iconfield>
+                </div>
+            </ng-template>
+
+            <ng-template pTemplate="header">
+                <tr>
+                    <th pSortableColumn="bindingType">Binding Type <p-sortIcon field="bindingType" /></th>
+                    <th pSortableColumn="partStatus">Part Status <p-sortIcon field="partStatus" /></th>
+                    <th pSortableColumn="securityLabel">Security Label <p-sortIcon field="securityLabel" /></th>
+                    <th pSortableColumn="shrinkwrap">Shrinkwrap <p-sortIcon field="shrinkwrap" /></th>
+                    <th pSortableColumn="threeHoleDrill">Three Hole Drill <p-sortIcon field="threeHoleDrill" /></th>
+                    <th pSortableColumn="perf">Perf <p-sortIcon field="perf" /></th>
+                    <th pSortableColumn="productionPage">Production Page <p-sortIcon field="productionPage" /></th>
+                    <th pSortableColumn="thickness">Thickness <p-sortIcon field="thickness" /></th>
+                    <th pSortableColumn="height">Height <p-sortIcon field="height" /></th>
+                    <th pSortableColumn="width">Width <p-sortIcon field="width" /></th>
+                    <th pSortableColumn="weight">Weight <p-sortIcon field="weight" /></th>
+                    <th pSortableColumn="textPaperType">Text Paper Type <p-sortIcon field="textPaperType" /></th>
+                    <th pSortableColumn="coverFinishType">Cover Finish Type <p-sortIcon field="coverFinishType" /></th>
+                    <th pSortableColumn="textColor">Text Color <p-sortIcon field="textColor" /></th>
+                    <th pSortableColumn="siren">Siren <p-sortIcon field="siren" /></th>
+                    <th pSortableColumn="quantity">Quantity <p-sortIcon field="quantity" /></th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-detail>
+                <tr>
+                    <td>{{ detail.bindingType }}</td>
+                    <td>{{ detail.partStatus }}</td>
+                    <td>{{ detail.securityLabel }}</td>
+                    <td>{{ detail.shrinkwrap }}</td>
+                    <td>{{ detail.threeHoleDrill }}</td>
+                    <td>{{ detail.perf }}</td>
+                    <td>{{ detail.productionPage }}</td>
+                    <td>{{ detail.thickness }}</td>
+                    <td>{{ detail.height }}</td>
+                    <td>{{ detail.width }}</td>
+                    <td>{{ detail.weight }}</td>
+                    <td>{{ detail.textPaperType }}</td>
+                    <td>{{ detail.coverFinishType }}</td>
+                    <td>{{ detail.textColor }}</td>
+                    <td>{{ detail.siren }}</td>
+                    <td>{{ detail.quantity }}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>

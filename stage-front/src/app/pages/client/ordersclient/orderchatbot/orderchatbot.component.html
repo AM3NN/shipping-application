@@ -1,0 +1,53 @@
+<div class="container">
+    <p-panel header="ChatCat" [style]="{width: '400px', margin: 'auto'}">
+        <div class="header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;">
+            <img ngSrc="assets/images/kitty.png" alt="CatChat Logo" style="width: 40px; height: 40px;">
+            <h2>ChatCat</h2>
+        </div>
+
+        <div class="message-container" style="height: 300px; overflow-y: auto; margin-bottom: 1rem;">
+            <ng-container *ngFor="let message of messages">
+                <div
+                    class="message"
+                    [ngClass]="{ 'to': message.author === 'bot', 'from': message.author === 'user' }"
+                    style="margin-bottom: 10px; display: flex;"
+                    [style.justify-content]="message.author === 'user' ? 'flex-end' : 'flex-start'">
+
+                    <ng-container *ngIf="message.author === 'bot'">
+                        <p-avatar
+                            image="assets/images/kitty.png"
+                            shape="circle"
+                            [style.margin-right.px]="10">
+                        </p-avatar>
+
+                        <div
+                            class="message-content"
+                            style="background-color: #e0e0e0; padding: 8px 12px; border-radius: 12px; max-width: 70%;">
+                            {{ message.content }}
+                        </div>
+                    </ng-container>
+
+                    <ng-container *ngIf="message.author === 'user'">
+                        <div
+                            class="message-content"
+                            style="background-color: #007ad9; color: white; padding: 8px 12px; border-radius: 12px; max-width: 70%;">
+                            {{ message.content }}
+                        </div>
+                    </ng-container>
+
+                </div>
+            </ng-container>
+        </div>
+
+        <div class="chat-input-container" style="display: flex; gap: 10px;">
+            <input
+                pInputText
+                [(ngModel)]="value"
+                (keyup.enter)="sendMessage()"
+                type="text"
+                placeholder="Type your message here..."
+                style="flex-grow: 1;" />
+            <button pButton icon="pi pi-paper-plane" (click)="sendMessage()" label=""></button>
+        </div>
+    </p-panel>
+</div>

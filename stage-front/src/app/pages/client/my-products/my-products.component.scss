@@ -1,0 +1,25 @@
+/* Conteneur scroll horizontal */
+.p-table-wrapper {
+    overflow-x: auto;
+    max-width: 100%;
+}
+
+/* Largeur min pour ne pas casser les colonnes */
+.p-table-wrapper table {
+    min-width: 1400px; /* ajuste selon ton contenu */
+}
+
+/* En-tête fixe */
+.p-table-wrapper .p-datatable-thead > tr > th {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 2;
+}
+
+/* Tableau compact */
+.p-datatable-sm .p-datatable-thead > tr > th,
+.p-datatable-sm .p-datatable-tbody > tr > td {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+}

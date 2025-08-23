@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class OrderDetail {
     @Id
     String id;
+    String Reference;
     String bindingType;
     String partStatus;
     Boolean securityLabel;

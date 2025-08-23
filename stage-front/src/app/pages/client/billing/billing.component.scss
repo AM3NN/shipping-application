@@ -1,0 +1,48 @@
+.stripe-dialog .p-dialog-header {
+    background-color: #4a90e2;  // bleu clair
+    color: #fff;
+    font-weight: bold;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+}
+
+.stripe-dialog .p-dialog-content {
+    padding: 2rem;
+    background-color: #f9f9f9; // fond clair
+}
+
+.stripe-container h4 {
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    color: #333;
+    text-align: center;
+}
+
+.stripe-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.stripe-errors {
+    color: #e74c3c;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    min-height: 20px;
+}
+
+.stripe-pay-btn {
+    width: 100%;
+    margin-top: 20px;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 10px 0;
+    transition: background-color 0.3s ease;
+}
+
+.stripe-pay-btn:hover {
+
+}
+

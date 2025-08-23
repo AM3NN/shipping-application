@@ -16,7 +16,6 @@ import java.util.List;
 @AllArgsConstructor
 @Document(collection = "orders")
 public class Order {
-
     @Id
     private String id;
     private String status;

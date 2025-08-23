@@ -40,6 +40,13 @@
                 <td>
                     <p-button icon="pi pi-pencil" (onClick)="editOrder(order)" class="p-button-text"></p-button>
                     <p-button icon="pi pi-trash" (onClick)="deleteOrder(order)" class="p-button-text p-button-danger"></p-button>
+                    <p-button
+                        label="Generate Invoice"
+                        icon="pi pi-file"
+                        (onClick)="generateInvoice(order)"
+                        styleClass="p-button-text p-button-danger">
+                    </p-button>
+
                 </td>
             </tr>
         </ng-template>

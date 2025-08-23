@@ -1319,4 +1319,8 @@ export class ProductService {
     generateRating() {
         return Math.floor(Math.random() * Math.floor(5) + 1);
     }
+
+    getPopularProductsByClient(clientId: string) {
+        
+    }
 }

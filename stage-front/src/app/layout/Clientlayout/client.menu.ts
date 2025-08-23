@@ -20,7 +20,6 @@ export class AppClientMenu {
 
 
     model: MenuItem[] = [];
-
     ngOnInit(): void {
         this.model = [
             {
@@ -30,12 +29,41 @@ export class AppClientMenu {
                 ],
             },
             {
+                label: 'Products',
+                items: [
+                    { label: 'All Products', icon: 'pi pi-tags', routerLink: ['/client/products'] },
+                    { label: 'My Products', icon: 'pi pi-box', routerLink: ['/client/my-products'] },
+                ],
+            },
+            {
+                label: 'Orders',
+                items: [
+                    { label: 'My Orders', icon: 'pi pi-shopping-cart', routerLink: ['/client/orders'] },
+                ],
+            },
+            {
+                label: 'Billing',
+                items: [
+                    { label: 'My Billings', icon: 'pi pi-credit-card', routerLink: ['/client/billing'] },
+                    { label: 'Payment History', icon: 'pi pi-history', routerLink: ['/client/payment-history'] },
+                ],
+            },
+            {
+                label: 'Shipping',
+                items: [
+                    { label: 'Track Shipment', icon: 'pi pi-truck', routerLink: ['/client/shipping'] },
+                    { label: 'Shipping History', icon: 'pi pi-calendar', routerLink: ['/client/shipping-history'] },
+                ],
+            },
+            {
                 label: 'Account',
                 items: [
                     { label: 'Profile', icon: 'pi pi-user', routerLink: ['/client/profile'] },
                     { label: 'Settings', icon: 'pi pi-cog', routerLink: ['/client/settings'] },
+                    { label: 'Logout', icon: 'pi pi-sign-out', routerLink: ['/logout'] },
                 ],
             },
         ];
     }
+
 }

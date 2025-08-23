@@ -151,7 +151,7 @@ export class OrderesclientComponent implements OnInit {
         {
             label: 'My Orders',
             icon: 'pi pi-fw pi-table',
-            routerLink: ['/uikit/Myorders']
+            routerLink: ['/client/orders']
         },
         {
             label: 'Track Order',
@@ -366,5 +366,9 @@ export class OrderesclientComponent implements OnInit {
 
     saveCustomOrder() {
 
+    }
+
+    generateInvoice(order: any) {
+        
     }
 }

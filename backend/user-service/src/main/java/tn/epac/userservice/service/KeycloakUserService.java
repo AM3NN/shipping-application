@@ -11,7 +11,7 @@ import tn.epac.userservice.dto.ProfileUpdateDTO;
 public class KeycloakUserService {
 
     @Autowired
-    private Keycloak keycloak;
+    protected Keycloak keycloak;
 
     public void updateUserProfile(String userId, ProfileUpdateDTO profile) {
         // Update basic profile

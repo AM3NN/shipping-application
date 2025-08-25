@@ -85,20 +85,20 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                    withSonarQubeEnv("${env.SONAR_SERVER}") {
-                        bat """
-                            mvn sonar:sonar \
-                            -Dsonar.projectKey=order-service \
-                            -Dsonar.projectKey=shipping-service \
-                            -Dsonar.projectKey=billing-service
-                        """
-                    }
-                }
-            }
-        }
+       stage('SonarQube Analysis') {
+           steps {
+               catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                   withSonarQubeEnv("${env.SONAR_SERVER}") {
+                       bat """
+                           mvn sonar:sonar ^
+                           -Dsonar.projectKey=order-service ^
+                           -Dsonar.host.url=http://localhost:9000 ^
+                           -Dsonar.login=sqa_1909642f8c661892915ded4761428df7f24c0e75
+                       """
+                   }
+               }
+           }
+       }
 
         stage('Quality Gate') {
             steps {

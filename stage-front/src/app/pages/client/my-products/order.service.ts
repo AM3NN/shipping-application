@@ -13,7 +13,20 @@ export class OrderService {
     constructor(private http: HttpClient, private keycloakService: KeycloakService) {}
 
 
-
+    getAllOrders(): Observable<Order[]> {
+        return this.getHeaders().pipe(
+            switchMap(headers =>
+                this.http.get<Order[]>(this.baseUrl, {
+                    headers,
+                    withCredentials: true
+                })
+            ),
+            catchError(err => {
+                console.error('Erreur récupération commandes :', err);
+                return throwError(() => new Error('Impossible de récupérer les commandes.'));
+            })
+        );
+    }
 
     private getHeaders(): Observable<HttpHeaders> {
         return from(Promise.resolve(this.keycloakService.isLoggedIn())).pipe(

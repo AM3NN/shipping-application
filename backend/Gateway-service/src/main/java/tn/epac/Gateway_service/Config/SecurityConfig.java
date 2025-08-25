@@ -49,7 +49,7 @@ public class SecurityConfig {
                         .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/order-service/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENT")
                         .pathMatchers("/billing-service/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENT")
-                        .pathMatchers("/user-service/**").hasAuthority("ROLE_ADMIN")
+                        .pathMatchers("/user-service/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENT")
                         .pathMatchers("/product-service/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENT")
                         .pathMatchers("/shipping-service/**").hasAuthority("ROLE_ADMIN")
                         .anyExchange().authenticated()

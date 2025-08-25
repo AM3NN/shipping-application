@@ -21,14 +21,19 @@ public class UserEntity {
     String id; // ID from Keycloak
 
     String username;
+    String companyname;
     String email;
     boolean enabled;
     LocalDate birthdate;
     String position;
-    String education;
-    String languages;
     String phoneNumber;
-
+    Double latitude;    // Latitude de l'adresse de livraison
+    Double longitude;   // Longitude de l'adresse de livraison
+   String street;
+    // Optionnel : pour une zone précise
+    String city;
+    String postalCode;
+    String country;
     @DBRef // Optional: if you want to reference documents from the "roles" collection
     Set<Role> roles;
 

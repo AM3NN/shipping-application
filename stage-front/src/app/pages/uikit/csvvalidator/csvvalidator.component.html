@@ -29,7 +29,7 @@
         </ng-template>
 
         <!-- Body -->
-        <ng-template pTemplate="body" let-product>
+        <ng-template pTemplate="body" let-product let-ri="rowIndex">
             <tr>
                 <td>
                     <div class="field-grid">
@@ -42,10 +42,11 @@
                 <td>
                     <button pButton type="button" label=" Database" icon="pi pi-plus"
                             class="p-button-success"
-                            (click)="addToDatabase(product)"></button>
+                            (click)="addToDatabase(product, ri)"></button>
                 </td>
             </tr>
         </ng-template>
+
     </p-table>
 
     <p *ngIf="!loading && validProducts.length === 0" class="empty-msg">
@@ -105,16 +106,42 @@
         No invalid products found.
     </p>
 </div>
-<p-dialog header="Modify Fields" [(visible)]="displayDialog" [modal]="true" [style]="{width: '500px'}">
-    <div *ngIf="selectedLine">
-        <div class="p-fluid">
-            <div *ngFor="let error of (selectedLine.errors || {}) | keyvalue">
-                <div class="p-field">
-                    <label>{{ error.key }}</label>
-                    <input pInputText [(ngModel)]="selectedLine.product[error.key]" />
+<p-dialog header="Modify Fields" [(visible)]="displayDialog" [modal]="true" [style]="{width: '700px'}">
+    <div *ngIf="selectedLine" class="dialog-content">
+
+        <div class="columns-container">
+
+            <!-- Boolean Fields -->
+            <div class="column">
+
+                <!-- String Fields -->
+                <h4>Text Fields</h4>
+                <div *ngFor="let key of stringFields" class="field-row">
+                    <label>{{ key }}</label>
+                    <input type="text" pInputText [(ngModel)]="selectedLine.product[key]" />
+                </div>
+                <h4>Boolean Fields</h4>
+                <div *ngFor="let key of booleanFields" class="field-row">
+                    <label>{{ key }}</label>
+                    <p-inputSwitch [(ngModel)]="selectedLine.product[key]"></p-inputSwitch>
                 </div>
             </div>
+
+            <!-- Number Fields -->
+            <div class="column">
+
+                <h4>Number Fields</h4>
+                <div *ngFor="let key of numberFields" class="field-row">
+                    <label>{{ key }}</label>
+                    <input type="number" pInputText [(ngModel)]="selectedLine.product[key]" />
+                </div>
+
+
+
+            </div>
+
         </div>
+
     </div>
 
     <ng-template pTemplate="footer">
@@ -122,3 +149,7 @@
         <button pButton label="Save" icon="pi pi-check" class="p-button-success" (click)="saveModifiedFields()"></button>
     </ng-template>
 </p-dialog>
+
+
+
+

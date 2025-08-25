@@ -3,6 +3,28 @@ import { Injectable } from '@angular/core';
 import { KeycloakService } from 'keycloak-angular';
 import { Observable, from, throwError } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
+
+
+export interface OrderDetailDTO {
+    Reference: string;
+    bindingType: string;
+    partStatus: string;
+    securityLabel: boolean;
+    shrinkwrap: boolean;
+    threeHoleDrill: boolean;
+    perf: boolean;
+    productionPage?: number;
+    thickness?: number;
+    height?: number;
+    width?: number;
+    weight?: number;
+    textPaperType: string;
+    coverFinishType: string;
+    textColor: string;
+    siren: string;
+    quantity: number;
+}
+
 export interface CsvProduct {
     [key: string]: any; // chaque champ peut être indexé par string
 }
@@ -82,4 +104,23 @@ export class CsvService {
             })
         );
     }
+
+
+    // CsvService.ts
+    addLineToDatabase(lineIndex: number, product: CsvProduct): Observable<any> {
+        return this.getHeaders().pipe(
+            switchMap((headers) =>
+                this.http.post(
+                    `${this.apiUrl}/add-to-db/${lineIndex}`,
+                    product,
+                    { headers }
+                )
+            ),
+            catchError((err) => {
+                console.error('Erreur ajout à la base:', err);
+                return throwError(() => err);
+            })
+        );
+    }
+
 }

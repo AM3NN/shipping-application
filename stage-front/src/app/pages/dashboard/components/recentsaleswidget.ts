@@ -2,46 +2,109 @@ import { Component } from '@angular/core';
 import { RippleModule } from 'primeng/ripple';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
 import { CommonModule } from '@angular/common';
-import { Product, ProductService } from '../../service/product.service';
+import { UserService } from "../../user/profile/user.service";
+import { MessageService } from "primeng/api";
 
 @Component({
     standalone: true,
-    selector: 'app-recent-sales-widget',
-    imports: [CommonModule, TableModule, ButtonModule, RippleModule],
-    template: `<div class="card !mb-8">
-        <div class="font-semibold text-xl mb-4">Recent Sales</div>
-        <p-table [value]="products" [paginator]="true" [rows]="5" responsiveLayout="scroll">
-            <ng-template #header>
-                <tr>
-                    <th>Image</th>
-                    <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
-                    <th pSortableColumn="price">Price <p-sortIcon field="price"></p-sortIcon></th>
-                    <th>View</th>
-                </tr>
-            </ng-template>
-            <ng-template #body let-product>
-                <tr>
-                    <td style="width: 15%; min-width: 5rem;">
-                        <img src="https://primefaces.org/cdn/primevue/images/product/{{ product.image }}" class="shadow-lg" alt="{{ product.name }}" width="50" />
-                    </td>
-                    <td style="width: 35%; min-width: 7rem;">{{ product.name }}</td>
-                    <td style="width: 35%; min-width: 8rem;">{{ product.price | currency: 'USD' }}</td>
-                    <td style="width: 15%;">
-                        <button pButton pRipple type="button" icon="pi pi-search" class="p-button p-component p-button-text p-button-icon-only"></button>
-                    </td>
-                </tr>
-            </ng-template>
-        </p-table>
-    </div>`,
-    providers: [ProductService]
-})
-export class RecentSalesWidget {
-    products!: Product[];
+    selector: 'app-active-sessions-widget',
+    imports: [CommonModule, TableModule, ButtonModule, RippleModule, DialogModule],
+    template: `
+        <div class="card !mb-8">
+            <div class="font-semibold text-xl mb-4">Active Sessions</div>
 
-    constructor(private productService: ProductService) {}
+            <p-table
+                [value]="activeSessions"
+                [paginator]="true"
+                [rows]="5"
+                responsiveLayout="scroll"
+                [loading]="loading"
+            >
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Start</th>
+                        <th>Last Access</th>
+                        <th></th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-session>
+                    <tr>
+                        <td>{{ session.username }}</td>
+                        <td>{{ session.email }}</td>
+                        <td>{{ session.start | date:'short' }}</td>
+                        <td>{{ session.lastAccess | date:'short' }}</td>
+                        <td>
+                            <button pButton
+                                    type="button"
+                                    label="View Events"
+                                    icon="pi pi-eye"
+                                    class="p-button-sm p-button-text"
+                                    (click)="viewUserEvents(session.userId)">
+                            </button>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+        <!-- Modal pour afficher les événements -->
+        <p-dialog header="User Events" [(visible)]="eventsModalVisible" [modal]="true" [closable]="true" [style]="{width: '600px'}">
+            <p-table [value]="userEvents" [paginator]="true" [rows]="10" responsiveLayout="scroll">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Type</th>
+                        <th>Time</th>
+
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-event>
+                    <tr>
+                        <td>{{ event.type }}</td>
+                        <td>{{ event.time | date:'short' }}</td>
+
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-dialog>
+    `,
+    providers: [UserService, MessageService],
+})
+export class ActiveSessionsWidget {
+    activeSessions: any[] = [];
+    loading = true;
+    userEvents: any[] = [];
+    eventsModalVisible = false; // Pour contrôler l'ouverture du modal
+
+    constructor(private userService: UserService, private messageService: MessageService) {}
 
     ngOnInit() {
-        this.productService.getProductsSmall().then((data) => (this.products = data));
+        this.userService.getActiveUsers().subscribe({
+            next: (data: any) => {
+                this.activeSessions = data.activeSessions || [];
+                this.loading = false;
+            },
+            error: (err) => {
+                console.error('Erreur récupération sessions actives:', err);
+                this.loading = false;
+            },
+        });
+    }
+
+    viewUserEvents(userId: string) {
+        this.userService.getUserEvents(userId).subscribe({
+            next: (data: any) => {
+                this.userEvents = data.events || [];
+                this.eventsModalVisible = true; // Ouvre le modal
+            },
+            error: (err) => {
+                console.error('Erreur récupération des events :', err);
+                this.messageService.add({severity:'error', summary:'Error', detail:'Failed to load events'});
+            }
+        });
     }
 }

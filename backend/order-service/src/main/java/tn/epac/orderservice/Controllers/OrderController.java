@@ -19,6 +19,8 @@ import tn.epac.orderservice.Services.OrderService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
+
+import java.io.IOException;
 import java.security.Principal;
 import java.util.*;
 
@@ -164,16 +166,37 @@ public class OrderController {
 
     public record ScrapeRequest(String url) {}
 
-    @PutMapping("/update/{lineIndex}")
-    public ResponseEntity<String> updateLine(
+    @PutMapping("/csv/products/update/{lineIndex}")
+    public ResponseEntity<Map<String, String>> updateCsvLine(
             @PathVariable int lineIndex,
-            @RequestBody Map<String, String> updatedFields) {
+            @RequestBody Map<String, String> newValues) {
         try {
-            csvService.updateCsvLine(lineIndex, updatedFields);
-            return ResponseEntity.ok("CSV line updated successfully");
+            csvService.updateCsvLine(lineIndex, newValues);
+            return ResponseEntity.ok(Map.of("message", "CSV line updated successfully"));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
+
+
+
+
+    @PostMapping("/csv/products/add-to-db/{lineIndex}")
+    public ResponseEntity<?> addLineToDatabase(
+            @PathVariable int lineIndex,
+            @RequestBody Map<String, String> values
+    ) {
+        try {
+            csvService.addToDatabaseAndRemoveCsvLine(lineIndex, values);
+            return ResponseEntity.ok(Map.of("message", "Line added to database and removed from CSV"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("message", "Error processing CSV file"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
 }
 

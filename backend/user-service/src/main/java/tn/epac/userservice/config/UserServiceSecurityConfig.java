@@ -37,7 +37,7 @@ public class UserServiceSecurityConfig {
                                 "/v3/api-docs/**",
                                 "/user/v3/api-docs/**",
                                 "/webjars/**",
-                        "/api/products/**"
+                        "/api/products/**","/uploads/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

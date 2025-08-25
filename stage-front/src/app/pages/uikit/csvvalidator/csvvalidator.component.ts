@@ -9,6 +9,7 @@ import { ButtonDirective } from "primeng/button";
 import { FormsModule } from "@angular/forms";
 import { Dialog } from "primeng/dialog";
 import { InputText } from "primeng/inputtext";
+import {InputSwitch} from "primeng/inputswitch";
 
 @Component({
     selector: 'app-csvvalidator',
@@ -23,7 +24,8 @@ import { InputText } from "primeng/inputtext";
         ButtonDirective,
         FormsModule,
         Dialog,
-        InputText
+        InputText,
+        InputSwitch
     ],
     providers: [MessageService],
     templateUrl: './csvvalidator.component.html',
@@ -36,7 +38,9 @@ export class CsvvalidatorComponent implements OnInit {
     selectedLine: CsvLine | null = null;
     loading = true;
     errorMsg: string = '';
-
+    booleanFields = ['securityLabel','shrinkwrap','threeHoleDrill','perf'];
+    numberFields = ['productionPage','thickness','height','width','weight','quantity'];
+    stringFields = ['Reference','bindingType','partStatus','textPaperType','coverFinishType','textColor','siren'];
     constructor(
         private csvService: CsvService,
         private messageService: MessageService   // ✅ injection manquante
@@ -104,7 +108,27 @@ export class CsvvalidatorComponent implements OnInit {
         });
     }
 
-    addToDatabase(product: any) {
-        // TODO: implémenter l’appel backend pour insérer le produit
+    addToDatabase(product: CsvProduct, index: number) {
+        this.csvService.addLineToDatabase(index, product).subscribe({
+            next: (res) => {
+                console.log(res);
+                this.validProducts.splice(index, 1); // supprime la ligne du tableau côté frontend
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Product added to database and removed from CSV'
+                });
+            },
+            error: (err) => {
+                console.error(err);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to add product to database'
+                });
+            }
+        });
     }
+
+
 }

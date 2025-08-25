@@ -24,7 +24,6 @@ import com.lowagie.text.pdf.PdfWriter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -197,5 +196,14 @@ public class InvoiceService implements IinvoiceService{
 
     public Invoice getInvoiceById(String invoiceId) {
         return invoiceRepository.findById(invoiceId).orElse(null);
+    }
+
+
+ @Override
+ public BigDecimal getTotalRevenue() {
+        List<Invoice> paidInvoices = invoiceRepository.findByPaidTrue(); // toutes les factures payées
+        return paidInvoices.stream()
+                .map(Invoice::getTotalAmount)          // récupère totalAmount de chaque facture
+                .reduce(BigDecimal.ZERO, BigDecimal::add); // additionne tous les montants
     }
 }

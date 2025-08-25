@@ -1,0 +1,23 @@
+.role-admin {
+    background-color: #fecaca; /* rouge clair */
+    color: #991b1b;            /* texte rouge foncé */
+
+    border-radius: 12px;
+    padding: 0.2rem 0.6rem;
+}
+
+.role-client {
+    background-color: #bfdbfe; /* bleu clair */
+    color: #1e3a8a;            /* texte bleu foncé */
+
+    border-radius: 12px;
+    padding: 0.2rem 0.6rem;
+}
+
+.role-default {
+    background-color: #e5e7eb; /* gris clair */
+    color: #374151;            /* texte gris foncé */
+
+    border-radius: 12px;
+    padding: 0.2rem 0.6rem;
+}

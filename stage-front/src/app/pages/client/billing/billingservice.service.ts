@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {KeycloakService} from "keycloak-angular";
-import {from, Observable, throwError} from "rxjs";
+import {from, Observable, of, throwError} from "rxjs";
 import {catchError, switchMap} from "rxjs/operators";
 import {Product} from "../products/productt.service";
 import {Invoice} from "./invoice.model";
@@ -127,6 +127,18 @@ export class BillingserviceService {
 
 
 
+    getTotalRevenue(): Observable<number> {
+        return this.getHeaders().pipe(
+            switchMap(headers =>
+                this.http.get<{ totalRevenue: number }>(`${this.apiUrl}/total-revenue`, { headers })
+            ),
+            switchMap(res => of(res.totalRevenue)), // extrait la valeur
+            catchError(err => {
+                console.error('Erreur lors de la récupération du revenu total:', err);
+                return of(0); // retourne 0 en cas d'erreur
+            })
+        );
+    }
 
 
 

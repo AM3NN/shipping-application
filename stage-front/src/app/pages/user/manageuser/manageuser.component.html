@@ -1,0 +1,129 @@
+<p-toolbar styleClass="mb-6">
+    <ng-template pTemplate="start">
+        <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+    </ng-template>
+
+</p-toolbar>
+<div class="user-table-container">
+    <h2>Users List</h2>
+
+    <p *ngIf="loading">Chargement...</p>
+    <p *ngIf="error" class="text-red-500">{{ error }}</p>
+
+    <p-table *ngIf="!loading && users.length > 0"
+             [value]="users"
+             [paginator]="true"
+             [rows]="5"
+             [rowsPerPageOptions]="[5,10,20]"
+             responsiveLayout="scroll">
+
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Photo</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Roles</th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-user>
+            <tr>
+                <td>
+                    <img *ngIf="user.profilePhotoPath; else noPhoto"
+                         [src]="'http://localhost:8084/uploads/' + user.profilePhotoPath"
+                         alt="Profile Photo" width="40" height="40"
+                         class="rounded-full shadow" />
+                    <ng-template #noPhoto>
+                        <span class="pi pi-user text-gray-400"></span>
+                    </ng-template>
+                </td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                    <ng-container *ngIf="user.roles?.length; else noRoles">
+                        <p-chip *ngFor="let role of user.roles"
+                                [label]="role"
+                                [ngClass]="getRoleClass(role)"
+                                class="mr-1">
+                        </p-chip>
+                    </ng-container>
+                    <ng-template #noRoles>
+                        <span class="text-gray-400">Aucun rôle</span>
+                    </ng-template>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+
+    <div *ngIf="!loading && users.length === 0">
+        Aucun utilisateur trouvé.
+    </div>
+</div>
+<p-dialog
+    header="Add User"
+    [(visible)]="userDialog"
+    [modal]="true"
+    [style]="{width: '600px', maxHeight: '80vh'}"
+    [responsive]="true"
+    [baseZIndex]="10000"
+    [closable]="true"
+>
+    <form [formGroup]="userForm" class="p-fluid p-formgrid p-grid">
+
+        <!-- Username -->
+        <div class="p-field p-col-12 p-md-6">
+            <label for="username">Username</label>
+            <input pInputText id="username" formControlName="username" />
+            <small *ngIf="submitted && userForm.controls['username'].invalid" class="p-error">
+                Username is required
+            </small>
+        </div>
+
+        <!-- Email -->
+        <div class="p-field p-col-12 p-md-6">
+            <label for="email">Email</label>
+            <input pInputText id="email" formControlName="email" />
+            <small *ngIf="submitted && userForm.controls['email'].invalid" class="p-error">
+                Valid email is required
+            </small>
+        </div>
+
+        <!-- Password -->
+        <div class="p-field p-col-12 p-md-6">
+            <label for="password">Password</label>
+            <input pInputText type="password" id="password" formControlName="password" />
+            <small *ngIf="submitted && userForm.controls['password'].invalid" class="p-error">
+                Password is required
+            </small>
+        </div>
+
+        <!-- Roles -->
+        <div class="p-field p-col-12 p-md-6">
+            <label>Roles</label>
+            <p-multiSelect
+                [options]="roleesDropdown"
+                formControlName="roles"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+                [filter]="true"
+                placeholder="Select role(s)"
+                appendTo="body">
+            </p-multiSelect>
+            <small *ngIf="submitted && userForm.controls['roles'].invalid" class="p-error">
+                At least one role must be selected
+            </small>
+        </div>
+
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="p-d-flex p-jc-end">
+            <button pButton label="Cancel" icon="pi pi-times" (click)="userDialog=false" class="p-button-text p-mr-2"></button>
+            <button pButton label="Save" icon="pi pi-check" (click)="saveUser()" [disabled]="userForm.invalid"></button>
+        </div>
+    </ng-template>
+</p-dialog>
+
+
+

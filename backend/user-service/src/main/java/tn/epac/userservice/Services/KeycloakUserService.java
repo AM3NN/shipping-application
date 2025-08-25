@@ -7,14 +7,18 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UsersResource;
-import org.keycloak.representations.idm.CredentialRepresentation;
-import org.keycloak.representations.idm.RoleRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.representations.idm.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import tn.epac.userservice.Entities.KeycloakEventDTO;
 import tn.epac.userservice.Entities.Role;
 import tn.epac.userservice.Entities.UserEntity;
 import tn.epac.userservice.Repository.RoleRepository;
@@ -36,7 +40,10 @@ public class KeycloakUserService {
     private final UserEntityRepository userRepository;
     private final RoleRepository roleRepository;
 
-
+    private final GeoCodingService geoCodingService;
+    private final RestTemplate restTemplate = new RestTemplate();
+    @Value("${keycloak.auth-server-url}")
+    private String keycloakBaseUrl;
     @Value("${keycloak.realm}")
     private String realm;
     @Value("${file.upload-dir}")
@@ -50,7 +57,8 @@ public class KeycloakUserService {
                                @Value("${keycloak.password}") String adminPassword,
                                UserEntityRepository userRepository,
                                RoleRepository roleRepository,
-                               UserEntityRepository userEntityRepository) {
+                               UserEntityRepository userEntityRepository, GeoCodingService geoCodingService) {
+        this.geoCodingService = geoCodingService;
         this.keycloak = KeycloakBuilder.builder()
                 .serverUrl(serverUrl)
                 .realm("master")
@@ -68,8 +76,33 @@ public class KeycloakUserService {
     private RealmResource getRealm() {
         return keycloak.realm(realm);
     }
+    public List<EventRepresentation> getEventsByUser(String userId, int max) {
+        try {
+            // Génère le token admin dynamique
+            String adminToken = keycloak.tokenManager().getAccessTokenString();
 
-    private UsersResource getUsersResource() {
+            String url = String.format("%s/admin/realms/%s/events?user=%s&maxResults=%d",
+                    keycloakBaseUrl, realm, userId, max);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + adminToken);
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<List> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    List.class
+            );
+
+            return response.getBody();
+        } catch (Exception e) {
+            log.error("Erreur lors de la récupération des événements Keycloak pour l'utilisateur {}: {}", userId, e.getMessage(), e);
+            return List.of();
+        }
+    }
+    public UsersResource getUsersResource() {
         return getRealm().users();
     }
 
@@ -134,6 +167,27 @@ public class KeycloakUserService {
                 })
                 .collect(Collectors.toList());
     }
+
+
+    public List<UserSessionRepresentation> getActiveSessions(String userId) {
+        try {
+            if (userId == null || !userId.matches("^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) {
+                log.error("Invalid user ID: {}", userId);
+                return Collections.emptyList();
+            }
+
+            List<UserSessionRepresentation> sessions = getUsersResource()
+                    .get(userId)
+                    .getUserSessions();
+
+            log.info("User {} has {} active session(s)", userId, sessions.size());
+            return sessions;
+        } catch (Exception e) {
+            log.error("Failed to fetch active sessions for user {}: {}", userId, e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+
 
     public String deleteUser(String userId) {
         if (userId == null || !userId.matches("^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) {
@@ -572,7 +626,7 @@ public class KeycloakUserService {
         return "User created with roles successfully!";
     }
 
-    public String createUserProfile(String userId, String birthdate, String position, String education, String languages, String phoneNumber) {
+    public String createUserProfile(String userId, String birthdate, String position, String phoneNumber) {
         if (userId == null || !userId.matches("^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) {
             log.error("Invalid user ID for profile creation: {}", userId);
             return "Invalid user ID: " + userId;
@@ -594,8 +648,7 @@ public class KeycloakUserService {
         }
 
         userEntity.setPosition(position);
-        userEntity.setEducation(education);
-        userEntity.setLanguages(languages);
+
         userEntity.setPhoneNumber(phoneNumber);
 
         userRepository.save(userEntity);
@@ -603,7 +656,21 @@ public class KeycloakUserService {
         return "User profile created successfully!";
     }
 
-    public String updateUserProfile(String userId, String birthdate, String position, String education, String languages, String phoneNumber) {
+    public String updateUserProfile(
+            String userId,
+            String username,
+            String companyname,
+            String email,
+            String birthdate,
+            String position,
+            String phoneNumber,
+            String street,
+            String city,
+            String postalCode,
+            String country
+
+    ) {
+        // Validation de l'ID utilisateur
         if (userId == null || !userId.matches("^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")) {
             log.error("Invalid user ID for profile update: {}", userId);
             return "Invalid user ID: " + userId;
@@ -616,6 +683,15 @@ public class KeycloakUserService {
         }
 
         UserEntity userEntity = userEntityOptional.get();
+
+        // Mise à jour des champs simples
+        if (username != null) userEntity.setUsername(username);
+        if (companyname != null) userEntity.setCompanyname(companyname);
+        if (email != null) userEntity.setEmail(email);
+        if (position != null) userEntity.setPosition(position);
+        if (phoneNumber != null) userEntity.setPhoneNumber(phoneNumber);
+
+        // Parsing de la date de naissance
         if (birthdate != null) {
             try {
                 LocalDate parsedBirthdate = LocalDate.parse(birthdate);
@@ -625,15 +701,22 @@ public class KeycloakUserService {
                 return "Invalid birthdate format. Use YYYY-MM-DD (e.g., 1989-06-06).";
             }
         }
-        if (position != null) userEntity.setPosition(position);
-        if (education != null) userEntity.setEducation(education);
-        if (languages != null) userEntity.setLanguages(languages);
-        if (phoneNumber != null) userEntity.setPhoneNumber(phoneNumber);
 
+        // Mise à jour de l'adresse
+        if (street != null) userEntity.setStreet(street);
+        if (city != null) userEntity.setCity(city);
+        if (postalCode != null) userEntity.setPostalCode(postalCode);
+        if (country != null) userEntity.setCountry(country);
+
+        // Mise à jour des coordonnées GPS
+
+
+        // Sauvegarde de l'utilisateur
         userRepository.save(userEntity);
         log.info("Profile updated for user ID: {}", userId);
         return "User profile updated successfully!";
     }
+
 
 
     public List<Map<String, Object>> searchUsers(String query) {
@@ -657,4 +740,26 @@ public class KeycloakUserService {
                 })
                 .collect(Collectors.toList());
     }
+
+
+    public void updateUserCoordinates(String userId, double latitude, double longitude) {
+        if (userId == null || userId.isEmpty()) {
+            log.error("User ID is null or empty. Cannot update coordinates.");
+            return;
+        }
+
+        Optional<UserEntity> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            log.warn("User not found with ID: {}. Cannot update coordinates.", userId);
+            return;
+        }
+
+        UserEntity user = userOptional.get();
+        user.setLatitude(latitude);
+        user.setLongitude(longitude);
+
+        userRepository.save(user);
+        log.info("Updated coordinates for user {}: lat={}, lon={}", userId, latitude, longitude);
+    }
+
 }

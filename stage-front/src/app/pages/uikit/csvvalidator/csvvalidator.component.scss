@@ -65,3 +65,33 @@
 .invalid-field .field-value-badge {
     background-color: #ffebee;
 }
+.dialog-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.columns-container {
+    display: flex;
+    gap: 2rem; /* espace entre les colonnes */
+}
+
+.column {
+    flex: 1;
+}
+
+.field-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.field-row label {
+    width: 120px; /* largeur fixe pour aligner les champs */
+    margin-right: 0.5rem;
+    font-weight: 500;
+}
+
+.field-row input,
+.field-row p-inputSwitch {
+    flex: 1;
+}

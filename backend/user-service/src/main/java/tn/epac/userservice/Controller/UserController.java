@@ -1,8 +1,12 @@
 package tn.epac.userservice.Controller;
 
 
+import com.nimbusds.jose.shaded.gson.Gson;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.keycloak.representations.idm.EventRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.representations.idm.UserSessionRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -18,13 +22,12 @@ import lombok.RequiredArgsConstructor;
 import tn.epac.userservice.Entities.Role;
 import tn.epac.userservice.Entities.UserEntity;
 import tn.epac.userservice.Repository.UserEntityRepository;
+import tn.epac.userservice.Services.GeoCodingService;
 import tn.epac.userservice.Services.KeycloakUserService;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 @SecurityRequirement(name = "bearerAuth")
 @RestController
@@ -35,6 +38,8 @@ public class UserController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final KeycloakUserService keycloakUserService;
     private final UserEntityRepository userEntityRepository;
+    private final  GeoCodingService geoCodingService;
+
 
     @GetMapping("/all")
     public ResponseEntity<List<Map<String, Object>>> getAllUsers() {
@@ -53,6 +58,7 @@ public class UserController {
                     userMap.put("id", user.getId());
                     userMap.put("username", user.getUsername());
                     userMap.put("email", user.getEmail());
+                    userMap.put("profilePhotoPath", user.getProfilePhotoPath());
                     userMap.put("enabled", user.isEnabled());
                     List<String> roleNames = user.getRoles().stream()
                             .map(Role::getRoleName)
@@ -185,9 +191,11 @@ public class UserController {
                     .body(("Failed to retrieve profile photo: " + e.getMessage()).getBytes());
         }
     }
-
     @PostMapping(value = "/{userId}/profile-photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Map<String, String>> uploadProfilePhoto(@PathVariable String userId, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Map<String, String>> uploadProfilePhoto(
+            @PathVariable String userId,
+            @RequestParam("file") MultipartFile file) {
+
         try {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             String authenticatedUserId = jwt.getSubject();
@@ -199,32 +207,57 @@ public class UserController {
             }
 
             if (file.isEmpty()) {
-                log.warn("Empty file uploaded for user {}", userId);
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(Map.of("error", "File is empty."));
             }
 
             String contentType = file.getContentType();
-            if (!"image/jpeg".equals(contentType) && !"image/png".equals(contentType)) {
-                log.warn("Invalid file type {} for user {}", contentType, userId);
+            if (contentType == null ||
+                    !(contentType.equals("image/jpeg") ||
+                            contentType.equals("image/jpg") ||
+                            contentType.equals("image/png"))) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Map.of("error", "Only JPEG or PNG files are allowed."));
+                        .body(Map.of("error", "Only JPG, JPEG or PNG files are allowed."));
             }
 
-            String result = keycloakUserService.uploadProfilePhoto(userId, file);
-            if (result.contains("successfully")) {
-                return ResponseEntity.ok(Map.of("message", result));
-            } else {
-                log.error("Failed to upload profile photo: {}", result);
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(Map.of("error", result));
+            // 📂 Chemin absolu vers uploads/
+            String uploadDir = System.getProperty("user.home") + File.separator + "uploads";
+            File dir = new File(uploadDir);
+            if (!dir.exists()) {
+                dir.mkdirs();
             }
+
+            // 📄 Nom de fichier unique
+            String fileName = userId + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            File destination = new File(dir, fileName);
+            file.transferTo(destination);
+
+            // 🔥 Mise à jour en DB
+            Optional<UserEntity> optionalUser = userEntityRepository.findById(userId);
+            if (optionalUser.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "User not found"));
+            }
+
+            UserEntity user = optionalUser.get();
+            user.setProfilePhotoPath(fileName);
+            userEntityRepository.save(user);
+
+            log.info("Profile photo for user {} uploaded: {}", userId, fileName);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Profile photo uploaded successfully",
+                    "path", "/uploads/" + fileName
+            ));
+
         } catch (Exception e) {
-            log.error("Unexpected error uploading profile photo for user {}: {}", userId, e.getMessage(), e);
+            log.error("Error uploading profile photo for user {}: {}", userId, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to upload profile photo: " + e.getMessage()));
         }
     }
+
+
 
     @DeleteMapping("/roles/delete/{roleId}")
     public ResponseEntity<String> deleteRole(@PathVariable String roleId) {
@@ -273,7 +306,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing required fields: birthdate, position, education, or languages");
         }
 
-        String result = keycloakUserService.createUserProfile(userId, birthdate, position, education, languages, phoneNumber);
+        String result = keycloakUserService.createUserProfile(userId, birthdate, position, phoneNumber);
         if (result.contains("successfully")) {
             return ResponseEntity.status(HttpStatus.CREATED).body(result);
         } else if (result.contains("not found")) {
@@ -282,9 +315,11 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
         }
     }
-
     @PutMapping("/{userId}/profile")
-    public ResponseEntity<String> updateUserProfile(@PathVariable String userId, @RequestBody Map<String, Object> request) {
+    public ResponseEntity<String> updateUserProfile(
+            @PathVariable String userId,
+            @RequestBody Map<String, Object> request
+    ) {
         Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String authenticatedUserId = jwt.getSubject();
 
@@ -293,13 +328,61 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only update your own profile.");
         }
 
+        // Récupération des champs depuis la requête
+        String username = (String) request.get("username");
+        String companyname = (String) request.get("companyname");
+        String email = (String) request.get("email");
         String birthdate = (String) request.get("birthdate");
         String position = (String) request.get("position");
-        String education = (String) request.get("education");
-        String languages = (String) request.get("languages");
         String phoneNumber = (String) request.get("phoneNumber");
+        String street = (String) request.get("street");
+        String city = (String) request.get("city");
+        String postalCode = (String) request.get("postalCode");
+        String country = (String) request.get("country");
 
-        String result = keycloakUserService.updateUserProfile(userId, birthdate, position, education, languages, phoneNumber);
+        // Mise à jour de l'utilisateur via le service Keycloak
+        String result = keycloakUserService.updateUserProfile(
+                userId,
+                username,
+                companyname,
+                email,
+                birthdate,
+                position,
+                phoneNumber,
+                street,
+                city,
+                postalCode,
+                country
+        );
+
+        // Calcul automatique latitude / longitude si adresse complète présente
+        if (street != null && city != null && postalCode != null && country != null &&
+                !street.isBlank() && !city.isBlank() && !postalCode.isBlank() && !country.isBlank()) {
+            try {
+                // Appel au service GeoCoding
+                double[] latLng = geoCodingService.geocodeAddress(street, city, postalCode, country);
+
+                double latitude = latLng[0];
+                double longitude = latLng[1];
+
+                // Vérifie que les coordonnées sont valides
+                if (latitude != 0 && longitude != 0) {
+                    // Mise à jour de l'utilisateur avec les coordonnées GPS
+                    keycloakUserService.updateUserCoordinates(userId, latitude, longitude);
+                } else {
+                    log.warn("Aucune coordonnée trouvée pour l'adresse : {}, {}, {}, {}", street, city, postalCode, country);
+                }
+
+            } catch (NumberFormatException nfe) {
+                log.error("Erreur parsing latitude/longitude pour l'adresse {} {} {} {}: {}",
+                        street, city, postalCode, country, nfe.getMessage(), nfe);
+            } catch (Exception e) {
+                log.error("Erreur géocodage adresse pour user {}: {}", userId, e.getMessage(), e);
+                // On ne bloque pas la mise à jour du profil si le géocodage échoue
+            }
+        }
+
+        // Retour de la réponse HTTP
         if (result.contains("successfully")) {
             return ResponseEntity.ok(result);
         } else if (result.contains("not found")) {
@@ -310,6 +393,9 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
         }
     }
+
+
+
 
     @GetMapping("/{userId}/profile")
     public ResponseEntity<Map<String, Object>> getUserProfile(@PathVariable String userId) {
@@ -327,8 +413,13 @@ public class UserController {
         profile.put("username", user.getUsername());
         profile.put("birthdate", user.getBirthdate());
         profile.put("position", user.getPosition());
-        profile.put("education", user.getEducation());
-        profile.put("languages", user.getLanguages());
+        profile.put("latitude", user.getLatitude());
+        profile.put("longitude", user.getLongitude());
+        profile.put("street", user.getStreet());
+        profile.put("city", user.getCity());
+        profile.put("postalCode", user.getPostalCode());
+        profile.put("country", user.getCountry());
+        profile.put("profilePhoto", user.getProfilePhoto()); // si tu veux envoyer le tableau d'octets
         if (authenticatedUserId.equals(userId)) {
             profile.put("phoneNumber", user.getPhoneNumber());
         }
@@ -336,6 +427,120 @@ public class UserController {
 
         return ResponseEntity.ok(profile);
     }
+
+
+    @GetMapping("/sessions")
+    public ResponseEntity<?> getAllActiveSessions() {
+        try {
+            // ✅ Récupérer tous les utilisateurs du realm
+            List<UserRepresentation> users = keycloakUserService.getUsersResource().list();
+
+            List<Map<String, Object>> activeSessions = new ArrayList<>();
+
+            for (UserRepresentation user : users) {
+                // ✅ Récupérer les sessions actives de chaque utilisateur
+                List<UserSessionRepresentation> sessions = keycloakUserService
+                        .getUsersResource()
+                        .get(user.getId())
+                        .getUserSessions();
+
+                if (sessions != null && !sessions.isEmpty()) {
+                    for (UserSessionRepresentation session : sessions) {
+                        Map<String, Object> sessionInfo = new HashMap<>();
+                        sessionInfo.put("userId", user.getId());
+                        sessionInfo.put("username", user.getUsername());
+                        sessionInfo.put("email", user.getEmail());
+                        sessionInfo.put("sessionId", session.getId());
+                        sessionInfo.put("ipAddress", session.getIpAddress());
+                        sessionInfo.put("start", session.getStart());
+                        sessionInfo.put("lastAccess", session.getLastAccess());
+                        sessionInfo.put("clients", session.getClients());
+
+                        activeSessions.add(sessionInfo);
+                    }
+                }
+            }
+
+            log.info("Fetched {} active sessions across all users", activeSessions.size());
+
+            return ResponseEntity.ok(Map.of(
+                    "totalActiveSessions", activeSessions.size(),
+                    "activeSessions", activeSessions
+            ));
+
+        } catch (Exception e) {
+            log.error("Error fetching all active sessions: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to fetch active sessions: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{userId}/events")
+    public ResponseEntity<?> getUserEvents(
+            @PathVariable String userId,
+            @RequestParam(defaultValue = "50") int max
+    ) {
+        try {
+            // Récupère l'utilisateur connecté via JWT
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+            // 🔹 Extraire les rôles depuis le JWT
+            Map<String, Object> realmAccess = jwt.getClaim("realm_access");
+            List<String> roles = Collections.emptyList();
+            if (realmAccess != null && realmAccess.get("roles") instanceof List<?> r) {
+                roles = r.stream().map(Object::toString).toList();
+            }
+
+            boolean isAdmin = roles.contains("ROLE_ADMIN"); // ou "ROLE_ADMIN" selon ta config
+
+            // 🔹 Vérification : seul un admin peut accéder
+            if (!isAdmin) {
+                log.warn("Unauthorized access: user {} tried to fetch events of user {}", jwt.getSubject(), userId);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("error", "Only admins can view events of other users."));
+            }
+
+            // 🔹 Récupère les événements via le service
+            List<EventRepresentation> events = keycloakUserService.getEventsByUser(userId, max);
+
+            // 🔹 Prépare la réponse avec username et email pour plus de contexte
+            Optional<UserEntity> optionalUser = userEntityRepository.findById(userId);
+            String username = optionalUser.map(UserEntity::getUsername).orElse("Unknown");
+            String email = optionalUser.map(UserEntity::getEmail).orElse("Unknown");
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("userId", userId);
+            response.put("username", username);
+            response.put("email", email);
+            response.put("totalEvents", events.size());
+            response.put("events", events);
+
+            log.info("Fetched {} events for user {}", events.size(), userId);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("Error fetching events for user {}: {}", userId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to fetch events: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/clients")
+    public ResponseEntity<List<Map<String, Object>>> getAllClients() {
+        List<UserEntity> users = userEntityRepository.findAll();
+
+        List<Map<String, Object>> clients = users.stream().map(user -> {
+            Map<String, Object> clientMap = new HashMap<>();
+            clientMap.put("id", user.getId());
+            clientMap.put("username", user.getUsername());
+            clientMap.put("latitude", user.getLatitude());
+            clientMap.put("longitude", user.getLongitude());
+            return clientMap;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(clients);
+    }
+
 
 
 }

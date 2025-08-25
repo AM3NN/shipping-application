@@ -1,4 +1,4 @@
-import "./chunk-WDMUDEB6.js";
+import "./chunk-7RSYZEEK.js";
 
 // node_modules/@stripe/stripe-js/dist/index.mjs
 var RELEASE_TRAIN = "basil";

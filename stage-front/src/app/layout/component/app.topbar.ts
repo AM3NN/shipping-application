@@ -77,7 +77,7 @@ import { KeycloakProfile } from 'keycloak-js';
                         <i class="pi pi-inbox"></i>
                         <span>Messages</span>
                     </button>
-                    <button type="button" class="layout-topbar-action">
+                    <button type="button" class="layout-topbar-action" (click)="goToProfile()">
                         <i class="pi pi-user"></i>
                         <span>Profile</span>
                     </button>
@@ -148,4 +148,8 @@ export class AppTopbar implements OnInit {
     ngOnInit(): void {
     }
 
+
+    goToProfile() {
+        this.router.navigate(['/user/profile']);
+    }
 }

@@ -159,6 +159,19 @@ public class InvoiceController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
-
+    @GetMapping("/total-revenue")
+    public ResponseEntity<Map<String, Object>> getTotalRevenue() {
+        try {
+            BigDecimal totalRevenue = invoiceService.getTotalRevenue();
+            return ResponseEntity.ok(Map.of(
+                    "totalRevenue", totalRevenue
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                    "error", "Failed to calculate total revenue",
+                    "details", e.getMessage()
+            ));
+        }
+    }
 
 }

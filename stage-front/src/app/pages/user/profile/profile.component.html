@@ -1,0 +1,75 @@
+<p-card header="User Profile" class="profile-card">
+    <div class="profile-container">
+        <!-- Column 1: Photo and upload -->
+        <div class="profile-column photo-column">
+
+            <img
+                *ngIf="userProfile?.profilePhotoPath; else defaultPhoto"
+                [src]="'http://localhost:8084/uploads/' + userProfile.profilePhotoPath"
+                class="profile-photo"
+                alt="Profile Photo"
+            />
+            <ng-template #defaultPhoto>
+                <span>No photo available</span>
+            </ng-template>
+
+            <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+            <button
+                pButton
+                type="button"
+                label="Upload"
+                icon="pi pi-upload"
+                class="p-button-success mt-2"
+                (click)="uploadPhoto()"
+            ></button>
+        </div>
+        <!-- Column 2: User information -->
+        <div class="profile-column info-column" *ngIf="userProfile">
+            <div class="field"><label>Username:</label><span>{{ userProfile.username }}</span></div>
+            <div class="field"><label>Company:</label><span>{{ userProfile.companyname }}</span></div>
+            <div class="field"><label>Email:</label><span>{{ userProfile.email }}</span></div>
+            <div class="field"><label>Phone:</label><span>{{ userProfile.phoneNumber }}</span></div>
+            <div class="field"><label>Position:</label><span>{{ userProfile.position }}</span></div>
+            <div class="field"><label>Birthdate:</label><span>{{ userProfile.birthdate | date }}</span></div>
+            <div class="field"><label>City:</label><span>{{ userProfile.city }}</span></div>
+            <div class="field"><label>Postal Code:</label><span>{{ userProfile.postalCode }}</span></div>
+            <div class="field"><label>Country:</label><span>{{ userProfile.country }}</span></div>
+            <div class="field"><label>Latitude:</label><span>{{ userProfile.latitude }}</span></div>
+            <div class="field"><label>Longitude:</label><span>{{ userProfile.longitude }}</span></div>
+
+            <div class="field-actions mt-3">
+                <button
+                    pButton
+                    type="button"
+                    label="Edit Profile"
+                    icon="pi pi-pencil"
+                    class="p-button-warning"
+                    (click)="displayDialog = true"
+                ></button>
+            </div>
+        </div>
+    </div>
+</p-card>
+
+<!-- Edit Dialog -->
+<p-dialog header="Edit Profile" [(visible)]="displayDialog" [modal]="true" [style]="{ width: '500px' }">
+    <div class="p-fluid" *ngIf="userProfile">
+        <div class="field"><label>Username</label><input type="text" pInputText [(ngModel)]="userProfile.username" /></div>
+        <div class="field"><label>Company</label><input type="text" pInputText [(ngModel)]="userProfile.companyname" /></div>
+        <div class="field"><label>Email</label><input type="text" pInputText [(ngModel)]="userProfile.email" /></div>
+        <div class="field"><label>Phone</label><input type="text" pInputText [(ngModel)]="userProfile.phoneNumber" /></div>
+        <div class="field"><label>Position</label><input type="text" pInputText [(ngModel)]="userProfile.position" /></div>
+        <div class="field"><label>Birthdate</label><input type="date" pInputText [(ngModel)]="userProfile.birthdate" /></div>
+        <div class="field"><label>Street</label><input type="text" pInputText [(ngModel)]="userProfile.street" /></div>
+        <div class="field"><label>City</label><input type="text" pInputText [(ngModel)]="userProfile.city" /></div>
+        <div class="field"><label>Postal Code</label><input type="text" pInputText [(ngModel)]="userProfile.postalCode" /></div>
+        <div class="field"><label>Country</label><input type="text" pInputText [(ngModel)]="userProfile.country" /></div>
+        <div class="field"><label>Latitude</label><input type="number" pInputText [(ngModel)]="userProfile.latitude" /></div>
+        <div class="field"><label>Longitude</label><input type="number" pInputText [(ngModel)]="userProfile.longitude" /></div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="displayDialog = false"></button>
+        <button pButton label="Save" icon="pi pi-check" class="p-button-success" (click)="saveProfile(); displayDialog = false"></button>
+    </ng-template>
+</p-dialog>

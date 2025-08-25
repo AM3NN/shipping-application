@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface InvoiceRepository extends MongoRepository<Invoice, String> {
     Optional<Invoice> findByPaymentIntentId(String paymentIntentId);
     List<Invoice> findByCustomerId(String customerId);
+    List<Invoice> findByPaidTrue();
 }

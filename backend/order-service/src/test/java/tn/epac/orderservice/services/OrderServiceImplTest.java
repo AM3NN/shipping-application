@@ -114,6 +114,7 @@ class OrderServiceImplTest {
         updateDto.setTotalAmount(BigDecimal.valueOf(300));
         updateDto.setTotalCurrency("EUR");
         updateDto.setCreatedDate(LocalDate.of(2025, 8, 1));
+        updateDto.setPredictedPrice(200.0); // Set predictedPrice to avoid null
 
         Order updatedOrder = new Order();
         updatedOrder.setId(orderId);
@@ -121,6 +122,7 @@ class OrderServiceImplTest {
         updatedOrder.setTotalAmount(updateDto.getTotalAmount());
         updatedOrder.setTotalCurrency(updateDto.getTotalCurrency());
         updatedOrder.setCreatedDate(updateDto.getCreatedDate());
+        updatedOrder.setPredictedPrice(updateDto.getPredictedPrice()); // Set predictedPrice in updatedOrder
 
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(existingOrder));
         when(orderRepository.save(any(Order.class))).thenReturn(updatedOrder);
@@ -130,8 +132,8 @@ class OrderServiceImplTest {
         assertNotNull(result);
         assertEquals("CONFIRMED", result.getStatus());
         assertEquals(BigDecimal.valueOf(300), result.getTotalAmount());
+        assertEquals(200.0, result.getPredictedPrice()); // Verify predictedPrice
     }
-
     @Test
     void testDeleteOrder() {
         int orderId = 1;

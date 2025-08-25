@@ -17,7 +17,6 @@ public class Invoice {
     private String id;
     private String orderId;
     private BigDecimal totalAmount;
-    @Setter
     private LocalDate issueDate;
     private boolean sent;
     private LocalDateTime sentAt;

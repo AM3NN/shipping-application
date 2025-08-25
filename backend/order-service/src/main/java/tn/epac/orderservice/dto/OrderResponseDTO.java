@@ -7,6 +7,7 @@ import java.time.LocalDate;
 @Data
 public class OrderResponseDTO {
     private int id;
+    private String userId;
     private String status;
     private String deliveryLocation;
     private LocalDate createdDate;

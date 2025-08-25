@@ -1,9 +1,13 @@
 package tn.epac.orderservice.controllers;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.*;
 import tn.epac.orderservice.dto.OrderRequestDTO;
 import tn.epac.orderservice.dto.OrderResponseDTO;
+import tn.epac.orderservice.exceptions.OrderNotFoundException;
 import tn.epac.orderservice.services.OrderService;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,28 +22,58 @@ public class OrderController {
     }
 
     @PostMapping
-    public OrderResponseDTO createOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
-        return orderService.createOrder(orderRequestDTO);
+    public ResponseEntity<OrderResponseDTO> createOrder(
+            @RequestBody OrderRequestDTO orderRequestDTO,
+            @AuthenticationPrincipal Jwt jwt) {
+        orderRequestDTO.setUserId(jwt.getClaimAsString("sub"));
+        try {
+            OrderResponseDTO response = orderService.createOrder(orderRequestDTO);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 
     @GetMapping
-    public List<OrderResponseDTO> getAllOrders() {
-        return orderService.getAllOrders();
+    public ResponseEntity<List<OrderResponseDTO>> getAllOrders() {
+        return ResponseEntity.ok(orderService.getAllOrders());
+    }
+
+    @GetMapping("/my-orders")
+    public ResponseEntity<List<OrderResponseDTO>> getMyOrders(@AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getClaimAsString("sub");
+        return ResponseEntity.ok(orderService.getOrdersByUserId(userId));
     }
 
     @GetMapping("/{id}")
-    public OrderResponseDTO getOrderById(@PathVariable int id) {
-        return orderService.getOrderById(id);
+    public ResponseEntity<OrderResponseDTO> getOrderById(@PathVariable int id) {
+        try {
+            return ResponseEntity.ok(orderService.getOrderById(id));
+        } catch (OrderNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PutMapping("/{id}")
-    public OrderResponseDTO updateOrder(@PathVariable int id,
-                                        @RequestBody OrderRequestDTO orderRequestDTO) {
-        return orderService.updateOrder(id, orderRequestDTO);
+    public ResponseEntity<OrderResponseDTO> updateOrder(
+            @PathVariable int id,
+            @RequestBody OrderRequestDTO orderRequestDTO,
+            @AuthenticationPrincipal Jwt jwt) {
+        orderRequestDTO.setUserId(jwt.getClaimAsString("sub"));
+        try {
+            return ResponseEntity.ok(orderService.updateOrder(id, orderRequestDTO));
+        } catch (OrderNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void deleteOrder(@PathVariable int id) {
-        orderService.deleteOrder(id);
+    public ResponseEntity<Void> deleteOrder(@PathVariable int id) {
+        try {
+            orderService.deleteOrder(id);
+            return ResponseEntity.ok().build();
+        } catch (OrderNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

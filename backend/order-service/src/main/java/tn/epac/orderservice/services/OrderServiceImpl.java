@@ -17,13 +17,10 @@ public class OrderServiceImpl implements OrderService {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
-
     private final OrderRepository orderRepository;
     private final SequenceGeneratorService sequenceGeneratorService;
     private final PredictionService predictionService;
 
-
-    // Constructor injection for all dependencies
     public OrderServiceImpl(PredictionService predictionService,
                             OrderRepository orderRepository,
                             SequenceGeneratorService sequenceGeneratorService) {
@@ -64,39 +61,60 @@ public class OrderServiceImpl implements OrderService {
                 .stream()
                 .map(OrderMapper::toDTO)
                 .toList();
-
         logger.info("Found {} orders", orders.size());
         return orders;
     }
 
     @Override
-    public OrderResponseDTO updateOrder(int id, OrderRequestDTO dto) {
-        Order existing = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
-
-        existing.setStatus(dto.getStatus());
-        existing.setShippingMethod(dto.getShippingMethod());
-
-        Order saved = orderRepository.save(existing);
-        return OrderMapper.toDTO(saved);
+    public List<OrderResponseDTO> getOrdersByUserId(String userId) {
+        logger.info("Fetching orders for userId: {}", userId);
+        List<OrderResponseDTO> orders = orderRepository.findByUserId(userId)
+                .stream()
+                .map(OrderMapper::toDTO)
+                .toList();
+        logger.info("Found {} orders for userId: {}", orders.size(), userId);
+        return orders;
     }
-
-    @Override
-    public void deleteOrder(int id) {
-        if (!orderRepository.existsById(id)) {
-            throw new OrderNotFoundException("Order not found with id: " + id);
-        }
-        orderRepository.deleteById(id);
-    }
-
 
     @Override
     public OrderResponseDTO getOrderById(int id) {
         logger.info("Fetching order by ID: {}", id);
         OrderResponseDTO orderDTO = orderRepository.findById(id)
                 .map(OrderMapper::toDTO)
-                .orElse(null);
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + id));
         logger.info("Found order: {}", orderDTO);
         return orderDTO;
+    }
+
+    @Override
+    public OrderResponseDTO updateOrder(int id, OrderRequestDTO dto) {
+        logger.info("Updating order with ID: {}", id);
+        Order existing = orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + id));
+        existing.setUserId(dto.getUserId());
+        existing.setStatus(dto.getStatus());
+        existing.setTotalAmount(dto.getTotalAmount());
+        existing.setQuantity(dto.getQuantity());
+        existing.setCreatedDate(dto.getCreatedDate());
+        existing.setExpectedDate(dto.getExpectedDate());
+        existing.setClosedDate(dto.getClosedDate());
+        existing.setEstimatedFabricationTime(dto.getEstimatedFabricationTime());
+        existing.setDeliveryLocation(dto.getDeliveryLocation());
+        existing.setPredictedPrice(dto.getPredictedPrice());
+        existing.setShippingMethod(dto.getShippingMethod());
+
+        Order saved = orderRepository.save(existing);
+        logger.info("Updated order with ID: {}", saved.getId());
+        return OrderMapper.toDTO(saved);
+    }
+
+    @Override
+    public void deleteOrder(int id) {
+        logger.info("Deleting order with ID: {}", id);
+        if (!orderRepository.existsById(id)) {
+            throw new OrderNotFoundException("Order not found with id: " + id);
+        }
+        orderRepository.deleteById(id);
+        logger.info("Deleted order with ID: {}", id);
     }
 }

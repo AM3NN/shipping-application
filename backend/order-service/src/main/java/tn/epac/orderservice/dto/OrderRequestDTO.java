@@ -7,6 +7,7 @@ import java.time.LocalDate;
 
 @Data
 public class OrderRequestDTO {
+    private String userId;
     private boolean shrinkwrap;
     private int productionPage;
     private boolean perf;

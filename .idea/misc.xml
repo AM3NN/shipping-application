@@ -18,7 +18,13 @@
         <option value="$PROJECT_DIR$/product-service/pom.xml" />
         <option value="$PROJECT_DIR$/backend/discovery-service/pom.xml" />
         <option value="$PROJECT_DIR$/backend/product-service/pom.xml" />
+        <option value="$PROJECT_DIR$/backend/order-validator-service/pom.xml" />
       </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/backend/product-service/pom.xml" />
+      </set>
     </option>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_21" default="true" project-jdk-name="23 (4)" project-jdk-type="JavaSDK">

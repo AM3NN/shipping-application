@@ -5,13 +5,14 @@ import tn.epac.orderservice.entities.Order;
 
 public class OrderMapper {
 
-    // Private constructor to prevent instantiation
     private OrderMapper() {
         throw new UnsupportedOperationException("OrderMapper is a utility class and cannot be instantiated");
     }
 
     public static Order toEntity(OrderRequestDTO dto) {
         Order order = new Order();
+        order.setUserId(dto.getUserId());
+
         order.setStatus(dto.getStatus());
         order.setShippingMethod(dto.getShippingMethod());
         order.setShippingLocation(dto.getShippingLocation());
@@ -45,6 +46,8 @@ public class OrderMapper {
 
     public static OrderResponseDTO toDTO(Order order) {
         OrderResponseDTO dto = new OrderResponseDTO();
+        dto.setUserId(order.getUserId());
+
         dto.setId(order.getId());
         dto.setStatus(order.getStatus());
         dto.setDeliveryLocation(order.getDeliveryLocation());

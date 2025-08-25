@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import PropTypes from 'prop-types';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { Button } from 'primereact/button';
@@ -14,8 +15,6 @@ import 'primereact/resources/themes/lara-light-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import '../styles/OrderForm.css';
-
-// Mappings for form values to CSV values
 const paperTypeMapping = {
     OFFSET: '70#OFFSET',
     GLOSSY: '80_GlossText',
@@ -33,7 +32,7 @@ const textColorMapping = {
     '4/4': '4/4',
 };
 
-const OrderForm = () => {
+const OrderForm = ({ keycloak }) => {
     const {
         register,
         handleSubmit,
@@ -41,6 +40,8 @@ const OrderForm = () => {
         setValue,
         watch,
         reset,
+        setError,
+        clearErrors,
     } = useForm({
         defaultValues: {
             status: 'NEW',
@@ -63,27 +64,95 @@ const OrderForm = () => {
             shippingMethod: '',
             deliveryLocation: '',
             expectedDate: '',
+            shipmentStatus: '',
         },
     });
     const { id } = useParams();
-
     const [loadingPrediction, setLoadingPrediction] = useState(false);
     const [loadingSubmit, setLoadingSubmit] = useState(false);
     const [loadingOrder, setLoadingOrder] = useState(!!id);
+    const [loadingShipment, setLoadingShipment] = useState(false);
     const [apiError, setApiError] = useState(null);
     const [isEditMode, setIsEditMode] = useState(!!id);
     const toast = useRef(null);
 
     const today = new Date().toISOString().split('T')[0];
 
-    // Fetch existing order data
+    const watchedShippingMethod = watch('shippingMethod');
+    useEffect(() => {
+        console.log('Current shippingMethod:', watchedShippingMethod);
+        if (!watchedShippingMethod) {
+            setError('shippingMethod', { type: 'required', message: 'Shipping method is required' });
+        } else {
+            clearErrors('shippingMethod');
+        }
+    }, [watchedShippingMethod, setError, clearErrors]);
+
+    useEffect(() => {
+        const refreshInterval = setInterval(() => {
+            keycloak.updateToken(30).catch(() => {
+                console.error('Token refresh failed, logging out');
+                keycloak.logout();
+            });
+        }, 60000);
+        return () => clearInterval(refreshInterval);
+    }, [keycloak]);
+
+    const getToken = async () => {
+        try {
+            const refreshed = await keycloak.updateToken(10);
+            if (refreshed) console.log('Token was refreshed');
+            return keycloak.token;
+        } catch (error) {
+            console.error('Token refresh failed:', error);
+            keycloak.logout();
+            throw error;
+        }
+    };
+
+    const fetchShipmentStatus = useCallback(
+        async (orderId) => {
+            try {
+                setLoadingShipment(true);
+                const token = await getToken();
+                const response = await axios.get(`http://localhost:8083/shipping/status/${orderId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                    withCredentials: true,
+                });
+                setValue('shipmentStatus', response.data.status || 'PENDING');
+                toast.current.show({
+                    severity: 'info',
+                    summary: 'Shipment Status',
+                    detail: `Shipment status: ${response.data.status}`,
+                    life: 3000,
+                });
+            } catch (error) {
+                console.error('Error fetching shipment status:', error);
+                setApiError('Failed to fetch shipment status.');
+                toast.current.show({
+                    severity: 'error',
+                    summary: 'Shipment Error',
+                    detail: 'Failed to fetch shipment status.',
+                    life: 3000,
+                });
+            } finally {
+                setLoadingShipment(false);
+            }
+        },
+        [setValue]
+    );
+
     useEffect(() => {
         if (id) {
             setIsEditMode(true);
             const fetchOrder = async () => {
                 try {
                     setLoadingOrder(true);
-                    const response = await axios.get(`http://localhost:8081/orders/${id}`);
+                    const token = await getToken();
+                    const response = await axios.get(`http://localhost:8081/orders/${id}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                        withCredentials: true,
+                    });
                     console.log('API Response:', response.data);
                     const reverseBindingTypeMap = Object.fromEntries(
                         Object.entries(bindingTypeMapping).map(([k, v]) => [v, k])
@@ -121,16 +190,22 @@ const OrderForm = () => {
                         shippingMethod: response.data.shippingMethod || '',
                         deliveryLocation: response.data.deliveryLocation || '',
                         expectedDate: response.data.expectedDate?.split('T')[0] || '',
+                        shipmentStatus: '',
                     };
                     console.log('Mapped Order Data:', orderData);
                     reset(orderData);
+                    fetchShipmentStatus(id);
                 } catch (error) {
                     console.error('Error fetching order:', error);
-                    setApiError('Failed to load order data.');
+                    setApiError(
+                        error.message === 'Network Error'
+                            ? 'Network error - check CORS or server availability'
+                            : 'Failed to load order data. Please check your login.'
+                    );
                     toast.current.show({
                         severity: 'error',
                         summary: 'Error',
-                        detail: 'Failed to load order data.',
+                        detail: apiError,
                         life: 3000,
                     });
                 } finally {
@@ -139,9 +214,8 @@ const OrderForm = () => {
             };
             fetchOrder();
         }
-    }, [id, reset]);
+    }, [id, reset, keycloak, apiError, fetchShipmentStatus]);
 
-    // Watch form fields for dynamic updates
     const {
         quantity,
         production_page,
@@ -156,9 +230,11 @@ const OrderForm = () => {
         shrinkwrap,
         three_hole_drill,
         perf,
+        shippingMethod,
+        deliveryLocation,
+        expectedDate,
     } = watch();
 
-    // Debounce utility
     const debounce = (func, delay) => {
         let timer;
         return function (...args) {
@@ -167,25 +243,21 @@ const OrderForm = () => {
         };
     };
 
-    // Fetch prediction
     const fetchPrediction = useCallback(
         async (inputData) => {
+            // Clear previous API error only when attempting a new prediction
+            setApiError(null);
+            setLoadingPrediction(true);
+
             try {
-                setApiError(null);
-                setLoadingPrediction(true);
                 const mappedPaperType =
                     paperTypeMapping[inputData.textPaperType] || inputData.textPaperType;
                 const mappedBindingType =
                     bindingTypeMapping[inputData.bindingType] || inputData.bindingType;
                 const mappedTextColor =
                     textColorMapping[inputData.textColor] || inputData.textColor;
-                console.log('Sending prediction request:', {
-                    ...inputData,
-                    textPaperType: mappedPaperType,
-                    bindingType: mappedBindingType,
-                    textColor: mappedTextColor,
-                });
-                const { data } = await axios.post('http://localhost:5000/predict', {
+
+                const response = await axios.post('http://localhost:5000/predict', {
                     quantity: Number(inputData.quantity),
                     production_page: Number(inputData.production_page),
                     thickness: Number(inputData.thickness),
@@ -200,32 +272,42 @@ const OrderForm = () => {
                     three_hole_drill: Number(inputData.three_hole_drill),
                     perf: Number(inputData.perf),
                 });
-                console.log('Prediction response:', data);
+
+                const data = response.data;
                 const predictedPrice = Number(data.predictedPrice.toFixed(2));
                 const estimatedTime = data.estimatedFabricationTime;
-                const calculatedTotal = Number(
-                    (predictedPrice * Number(inputData.quantity)).toFixed(2)
-                );
+                const calculatedTotal = Number((predictedPrice * inputData.quantity).toFixed(2));
+
                 setValue('predictedPrice', predictedPrice);
                 setValue('estimatedFabricationTime', estimatedTime);
                 setValue('totalAmount', calculatedTotal);
             } catch (error) {
                 console.error('Prediction Error:', error);
-                setApiError('Failed to fetch price prediction.');
+                const errorMessage =
+                    error.message === 'Network Error'
+                        ? 'Network error - check if prediction service is running'
+                        : error.response?.status === 500
+                            ? 'Server error: Prediction model failed'
+                            : 'Failed to fetch price prediction. Please check inputs.';
+
                 toast.current.show({
                     severity: 'error',
-                    summary: 'Prediction Error',
-                    detail: 'Failed to fetch price prediction.',
-                    life: 3000,
+                    summary: 'Prediction Failed',
+                    detail: errorMessage,
+                    life: 4000,
                 });
+
                 setValue('predictedPrice', 0);
                 setValue('estimatedFabricationTime', '');
                 setValue('totalAmount', 0);
+
+
+                setApiError(errorMessage);
             } finally {
                 setLoadingPrediction(false);
             }
         },
-        [setValue]
+        [setValue, paperTypeMapping, bindingTypeMapping, textColorMapping] // ✅ Removed apiError
     );
 
     const debouncedFetchPrediction = useCallback(
@@ -233,7 +315,6 @@ const OrderForm = () => {
         [fetchPrediction]
     );
 
-    // Trigger predictions in create mode
     useEffect(() => {
         if (!isEditMode) {
             const readyForPrediction =
@@ -246,9 +327,13 @@ const OrderForm = () => {
                 textPaperType &&
                 coverFinishType &&
                 bindingType &&
-                textColor;
+                textColor &&
+                shippingMethod &&
+                deliveryLocation &&
+                expectedDate;
 
             if (readyForPrediction) {
+                console.log('Triggering prediction with shippingMethod:', shippingMethod);
                 debouncedFetchPrediction({
                     quantity,
                     production_page,
@@ -265,7 +350,6 @@ const OrderForm = () => {
                     perf,
                 });
             } else {
-                // Only update if values differ to avoid infinite loop
                 const currentValues = watch();
                 if (currentValues.predictedPrice !== 0) setValue('predictedPrice', 0);
                 if (currentValues.estimatedFabricationTime !== '') setValue('estimatedFabricationTime', '');
@@ -273,30 +357,77 @@ const OrderForm = () => {
             }
         }
     }, [
-        watch('quantity'),
-        watch('production_page'),
-        watch('thickness'),
-        watch('height'),
-        watch('width'),
-        watch('weight'),
-        watch('textPaperType'),
-        watch('coverFinishType'),
-        watch('bindingType'),
-        watch('textColor'),
-        watch('shrinkwrap'),
-        watch('three_hole_drill'),
-        watch('perf'),
+        quantity,
+        production_page,
+        thickness,
+        height,
+        width,
+        weight,
+        textPaperType,
+        coverFinishType,
+        bindingType,
+        textColor,
+        shrinkwrap,
+        three_hole_drill,
+        perf,
+        shippingMethod,
+        deliveryLocation,
+        expectedDate,
         isEditMode,
         debouncedFetchPrediction,
         setValue,
-        watch,
     ]);
 
-    // Handle form submission
+    const createShipment = async (orderId, carrier) => {
+        try {
+            const token = await getToken();
+            const trackingNumber = `TRK-${orderId}-${Date.now()}`;
+            const carrierMap = { FEDEX: 'FedEx', DHL: 'DHL' };
+            const mappedCarrier = carrierMap[carrier] || carrier;
+            console.log('Creating shipment with:', { orderId, trackingNumber, carrier: mappedCarrier });
+            const response = await axios.post(
+                'http://localhost:8083/shipping/create',
+                null,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    params: {
+                        orderId,
+                        trackingNumber,
+                        carrier: mappedCarrier,
+                    },
+                    withCredentials: true,
+                }
+            );
+            toast.current.show({
+                severity: 'success',
+                summary: 'Shipment Created',
+                detail: response.data.message || 'Shipment created successfully',
+                life: 3000,
+            });
+            fetchShipmentStatus(orderId);
+        } catch (error) {
+            console.error('Error creating shipment:', error);
+            let errorMessage = 'Failed to create shipment.';
+            if (error.code === 'ERR_NETWORK') {
+                errorMessage = 'Network error: Unable to reach shipping service at http://localhost:8083. Please check if the server is running.';
+            } else if (error.response) {
+                errorMessage = `Server error: ${error.response.status} - ${error.response.data.message || 'Unknown error'}`;
+            }
+            setApiError(errorMessage);
+            toast.current.show({
+                severity: 'error',
+                summary: 'Shipment Error',
+                detail: errorMessage,
+                life: 3000,
+            });
+        }
+    };
+
     const onSubmit = async (data) => {
         setApiError(null);
         setLoadingSubmit(true);
         try {
+            const token = await getToken();
             const payload = {
                 ...data,
                 textPaperType: paperTypeMapping[data.textPaperType] || data.textPaperType,
@@ -308,8 +439,15 @@ const OrderForm = () => {
             };
             console.log('Submitting payload:', payload);
             const response = id
-                ? await axios.put(`http://localhost:8081/orders/${id}`, payload)
-                : await axios.post('http://localhost:8081/orders', payload);
+                ? await axios.put(`http://localhost:8081/orders/${id}`, payload, {
+                    headers: { Authorization: `Bearer ${token}` },
+                    withCredentials: true,
+                })
+                : await axios.post('http://localhost:8081/orders', payload, {
+                    headers: { Authorization: `Bearer ${token}` },
+                    withCredentials: true,
+                });
+            const orderId = id || response.data.id;
             toast.current.show({
                 severity: 'success',
                 summary: 'Success',
@@ -317,14 +455,47 @@ const OrderForm = () => {
                 life: 3000,
             });
             console.log('Order response:', response.data);
-            if (!id) reset();
+            if (!id && data.shippingMethod) {
+                await createShipment(orderId, data.shippingMethod);
+            }
+            if (!id) {
+                reset({
+                    status: 'NEW',
+                    predictedPrice: 0,
+                    estimatedFabricationTime: '',
+                    totalAmount: 0,
+                    quantity: 1,
+                    production_page: 1,
+                    thickness: 0,
+                    height: 0,
+                    width: 0,
+                    weight: 0,
+                    textPaperType: '',
+                    coverFinishType: '',
+                    bindingType: '',
+                    textColor: '',
+                    shrinkwrap: false,
+                    three_hole_drill: false,
+                    perf: false,
+                    shippingMethod: data.shippingMethod,
+                    deliveryLocation: data.deliveryLocation,
+                    expectedDate: data.expectedDate,
+                    shipmentStatus: '',
+                });
+            }
         } catch (error) {
             console.error('Order submission error:', error);
-            setApiError('Failed to submit order. Please try again.');
+            setApiError(
+                error.message === 'Network Error'
+                    ? 'Network error - check CORS or server availability'
+                    : error.response?.status === 401
+                        ? 'Unauthorized - please check your login'
+                        : 'Failed to submit order. Please try again.'
+            );
             toast.current.show({
                 severity: 'error',
                 summary: 'Submission Error',
-                detail: 'Failed to submit order.',
+                detail: apiError,
                 life: 3000,
             });
         } finally {
@@ -350,8 +521,8 @@ const OrderForm = () => {
                 </h1>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <input type="hidden" {...register('status')} />
+                    <input type="hidden" {...register('shipmentStatus')} />
 
-                    {/* Shipping Details Section */}
                     <Panel
                         header="Shipping Details"
                         toggleable
@@ -363,23 +534,24 @@ const OrderForm = () => {
                                 <label htmlFor="shippingMethod" className="order-form-label">
                                     Shipping Method
                                 </label>
-                                {/* Shipping Method Dropdown */}
                                 <Dropdown
                                     id="shippingMethod"
-                                    value={watch('shippingMethod')}
-                                    onChange={(e) => setValue('shippingMethod', e.value, { shouldValidate: true })}
+                                    value={shippingMethod}
+                                    onChange={(e) => {
+                                        console.log('Selected shippingMethod:', e.value);
+                                        setValue('shippingMethod', e.value, { shouldValidate: true });
+                                    }}
                                     options={[
                                         { label: 'Select...', value: '' },
                                         { label: 'FedEx', value: 'FEDEX' },
-                                        { label: 'DHL', value: 'DHL' }
+                                        { label: 'DHL', value: 'DHL' },
                                     ]}
-                                    disabled={loadingOrder || loadingSubmit}
+                                    disabled={loadingOrder || loadingSubmit || loadingShipment}
                                     className={errors.shippingMethod ? 'p-invalid' : ''}
+                                    placeholder="Select a shipping method"
                                 />
                                 {errors.shippingMethod && (
-                                    <p className="order-form-error">
-                                        {errors.shippingMethod.message}
-                                    </p>
+                                    <p className="order-form-error">{errors.shippingMethod.message}</p>
                                 )}
                             </div>
 
@@ -394,13 +566,11 @@ const OrderForm = () => {
                                     {...register('deliveryLocation', {
                                         required: 'Delivery address is required',
                                     })}
-                                    disabled={loadingOrder || loadingSubmit}
+                                    disabled={loadingOrder || loadingSubmit || loadingShipment}
                                     className={errors.deliveryLocation ? 'p-invalid' : ''}
                                 />
                                 {errors.deliveryLocation && (
-                                    <p className="order-form-error">
-                                        {errors.deliveryLocation.message}
-                                    </p>
+                                    <p className="order-form-error">{errors.deliveryLocation.message}</p>
                                 )}
                             </div>
 
@@ -415,19 +585,16 @@ const OrderForm = () => {
                                     {...register('expectedDate', {
                                         required: 'Expected delivery date is required',
                                     })}
-                                    disabled={loadingOrder || loadingSubmit}
+                                    disabled={loadingOrder || loadingSubmit || loadingShipment}
                                     className={errors.expectedDate ? 'p-invalid' : ''}
                                 />
                                 {errors.expectedDate && (
-                                    <p className="order-form-error">
-                                        {errors.expectedDate.message}
-                                    </p>
+                                    <p className="order-form-error">{errors.expectedDate.message}</p>
                                 )}
                             </div>
                         </div>
                     </Panel>
 
-                    {/* Product Details Section */}
                     <Panel
                         header="Product Details"
                         toggleable
@@ -447,15 +614,13 @@ const OrderForm = () => {
                                         valueAsNumber: true,
                                     })}
                                     min={1}
-                                    disabled={loadingOrder || loadingSubmit}
+                                    disabled={loadingOrder || loadingSubmit || loadingShipment}
                                     className={errors.quantity ? 'p-invalid' : ''}
                                     onChange={(e) => setValue('quantity', e.value)}
                                     value={watch('quantity')}
                                 />
                                 {errors.quantity && (
-                                    <p className="order-form-error">
-                                        {errors.quantity.message}
-                                    </p>
+                                    <p className="order-form-error">{errors.quantity.message}</p>
                                 )}
                             </div>
 
@@ -471,15 +636,13 @@ const OrderForm = () => {
                                         valueAsNumber: true,
                                     })}
                                     min={1}
-                                    disabled={loadingOrder || loadingSubmit}
+                                    disabled={loadingOrder || loadingSubmit || loadingShipment}
                                     className={errors.production_page ? 'p-invalid' : ''}
                                     onChange={(e) => setValue('production_page', e.value)}
                                     value={watch('production_page')}
                                 />
                                 {errors.production_page && (
-                                    <p className="order-form-error">
-                                        {errors.production_page.message}
-                                    </p>
+                                    <p className="order-form-error">{errors.production_page.message}</p>
                                 )}
                             </div>
 
@@ -502,15 +665,13 @@ const OrderForm = () => {
                                     })}
                                     min={0}
                                     step={0.01}
-                                    disabled={loadingOrder || loadingSubmit}
+                                    disabled={loadingOrder || loadingSubmit || loadingShipment}
                                     className={errors.thickness ? 'p-invalid' : ''}
                                     onChange={(e) => setValue('thickness', e.value)}
                                     value={watch('thickness')}
                                 />
                                 {errors.thickness && (
-                                    <p className="order-form-error">
-                                        {errors.thickness.message}
-                                    </p>
+                                    <p className="order-form-error">{errors.thickness.message}</p>
                                 )}
                             </div>
 
@@ -527,7 +688,7 @@ const OrderForm = () => {
                                     })}
                                     min={0}
                                     step={0.01}
-                                    disabled={loadingOrder || loadingSubmit}
+                                    disabled={loadingOrder || loadingSubmit || loadingShipment}
                                     className={errors.height ? 'p-invalid' : ''}
                                     onChange={(e) => setValue('height', e.value)}
                                     value={watch('height')}
@@ -550,7 +711,7 @@ const OrderForm = () => {
                                     })}
                                     min={0}
                                     step={0.01}
-                                    disabled={loadingOrder || loadingSubmit}
+                                    disabled={loadingOrder || loadingSubmit || loadingShipment}
                                     className={errors.width ? 'p-invalid' : ''}
                                     onChange={(e) => setValue('width', e.value)}
                                     value={watch('width')}
@@ -573,7 +734,7 @@ const OrderForm = () => {
                                     })}
                                     min={0}
                                     step={0.01}
-                                    disabled={loadingOrder || loadingSubmit}
+                                    disabled={loadingOrder || loadingSubmit || loadingShipment}
                                     className={errors.weight ? 'p-invalid' : ''}
                                     onChange={(e) => setValue('weight', e.value)}
                                     value={watch('weight')}
@@ -584,8 +745,6 @@ const OrderForm = () => {
                             </div>
                         </div>
                     </Panel>
-
-                    {/* Finishing Options Section */}
                     <Panel
                         header="Finishing Options"
                         toggleable
@@ -593,7 +752,6 @@ const OrderForm = () => {
                         headerClassName="order-form-section-header"
                     >
                         <div className="order-form-grid">
-                            {/* Text Paper Type Dropdown */}
                             <div className="order-form-control">
                                 <label htmlFor="textPaperType" className="order-form-label">
                                     Text Paper Type
@@ -606,19 +764,16 @@ const OrderForm = () => {
                                         { label: 'Select...', value: '' },
                                         { label: 'Offset', value: 'OFFSET' },
                                         { label: 'Glossy', value: 'GLOSSY' },
-                                        { label: 'Matte', value: 'MATTE' }
+                                        { label: 'Matte', value: 'MATTE' },
                                     ]}
-                                    disabled={loadingOrder || loadingSubmit}
+                                    disabled={loadingOrder || loadingSubmit || loadingShipment}
                                     className={errors.textPaperType ? 'p-invalid' : ''}
                                 />
                                 {errors.textPaperType && (
-                                    <p className="order-form-error">
-                                        {errors.textPaperType.message}
-                                    </p>
+                                    <p className="order-form-error">{errors.textPaperType.message}</p>
                                 )}
                             </div>
 
-                            {/* Cover Finish Type Dropdown */}
                             <div className="order-form-control">
                                 <label htmlFor="coverFinishType" className="order-form-label">
                                     Cover Finish Type
@@ -630,19 +785,16 @@ const OrderForm = () => {
                                     options={[
                                         { label: 'Select...', value: '' },
                                         { label: 'Layflat Gloss', value: 'LAYFLAT-GLOSS' },
-                                        { label: 'Layflat Matte', value: 'LAYFLAT-MATTE' }
+                                        { label: 'Layflat Matte', value: 'LAYFLAT-MATTE' },
                                     ]}
-                                    disabled={loadingOrder || loadingSubmit}
+                                    disabled={loadingOrder || loadingSubmit || loadingShipment}
                                     className={errors.coverFinishType ? 'p-invalid' : ''}
                                 />
                                 {errors.coverFinishType && (
-                                    <p className="order-form-error">
-                                        {errors.coverFinishType.message}
-                                    </p>
+                                    <p className="order-form-error">{errors.coverFinishType.message}</p>
                                 )}
                             </div>
 
-                            {/* Binding Type Dropdown */}
                             <div className="order-form-control">
                                 <label htmlFor="bindingType" className="order-form-label">
                                     Binding Type
@@ -655,19 +807,16 @@ const OrderForm = () => {
                                         { label: 'Select...', value: '' },
                                         { label: 'Casebind', value: 'CASEBIND' },
                                         { label: 'Spiral', value: 'SPIRAL' },
-                                        { label: 'Stapled', value: 'STAPLED' }
+                                        { label: 'Stapled', value: 'STAPLED' },
                                     ]}
-                                    disabled={loadingOrder || loadingSubmit}
+                                    disabled={loadingOrder || loadingSubmit || loadingShipment}
                                     className={errors.bindingType ? 'p-invalid' : ''}
                                 />
                                 {errors.bindingType && (
-                                    <p className="order-form-error">
-                                        {errors.bindingType.message}
-                                    </p>
+                                    <p className="order-form-error">{errors.bindingType.message}</p>
                                 )}
                             </div>
 
-                            {/* Text Color Dropdown */}
                             <div className="order-form-control">
                                 <label htmlFor="textColor" className="order-form-label">
                                     Text Color
@@ -685,19 +834,16 @@ const OrderForm = () => {
                                     options={[
                                         { label: 'Select...', value: '' },
                                         { label: '1/1 (Black & White)', value: '1/1' },
-                                        { label: '4/4 (Full Color)', value: '4/4' }
+                                        { label: '4/4 (Full Color)', value: '4/4' },
                                     ]}
-                                    disabled={loadingOrder || loadingSubmit}
+                                    disabled={loadingOrder || loadingSubmit || loadingShipment}
                                     className={errors.textColor ? 'p-invalid' : ''}
                                 />
                                 {errors.textColor && (
-                                    <p className="order-form-error">
-                                        {errors.textColor.message}
-                                    </p>
+                                    <p className="order-form-error">{errors.textColor.message}</p>
                                 )}
                             </div>
 
-                            {/* Checkbox Group */}
                             <div className="order-form-checkbox-group">
                                 <div className="order-form-checkbox-item">
                                     <Checkbox
@@ -705,7 +851,7 @@ const OrderForm = () => {
                                         {...register('shrinkwrap')}
                                         checked={watch('shrinkwrap')}
                                         onChange={(e) => setValue('shrinkwrap', e.checked)}
-                                        disabled={loadingOrder || loadingSubmit}
+                                        disabled={loadingOrder || loadingSubmit || loadingShipment}
                                     />
                                     <label htmlFor="shrinkwrap">Shrinkwrap</label>
                                 </div>
@@ -716,7 +862,7 @@ const OrderForm = () => {
                                         {...register('three_hole_drill')}
                                         checked={watch('three_hole_drill')}
                                         onChange={(e) => setValue('three_hole_drill', e.checked)}
-                                        disabled={loadingOrder || loadingSubmit}
+                                        disabled={loadingOrder || loadingSubmit || loadingShipment}
                                     />
                                     <label htmlFor="three_hole_drill">Three Hole Drill</label>
                                 </div>
@@ -727,14 +873,13 @@ const OrderForm = () => {
                                         {...register('perf')}
                                         checked={watch('perf')}
                                         onChange={(e) => setValue('perf', e.checked)}
-                                        disabled={loadingOrder || loadingSubmit}
+                                        disabled={loadingOrder || loadingSubmit || loadingShipment}
                                     />
                                     <label htmlFor="perf">Perforation</label>
                                 </div>
                             </div>
                         </div>
                     </Panel>
-                    {/* Order Summary Section */}
                     <Panel
                         header="Order Summary"
                         toggleable
@@ -743,9 +888,7 @@ const OrderForm = () => {
                     >
                         <div className="order-form-grid">
                             <div className="order-form-control">
-                                <label className="order-form-label">
-                                    Total Amount
-                                </label>
+                                <label className="order-form-label">Total Amount</label>
                                 <InputNumber
                                     {...register('totalAmount', { valueAsNumber: true })}
                                     value={watch('totalAmount')}
@@ -756,9 +899,7 @@ const OrderForm = () => {
                             </div>
 
                             <div className="order-form-control">
-                                <label className="order-form-label">
-                                    Predicted Price
-                                </label>
+                                <label className="order-form-label">Predicted Price</label>
                                 <InputNumber
                                     {...register('predictedPrice', { valueAsNumber: true })}
                                     value={watch('predictedPrice')}
@@ -769,9 +910,7 @@ const OrderForm = () => {
                             </div>
 
                             <div className="order-form-control">
-                                <label className="order-form-label">
-                                    Estimated Fabrication Time (days)
-                                </label>
+                                <label className="order-form-label">Estimated Fabrication Time (days)</label>
                                 <input
                                     type="text"
                                     {...register('estimatedFabricationTime')}
@@ -780,8 +919,6 @@ const OrderForm = () => {
                             </div>
                         </div>
                     </Panel>
-
-                    {/* Form Actions */}
                     <div className="order-form-actions">
                         <Button
                             type="button"
@@ -789,17 +926,15 @@ const OrderForm = () => {
                             icon="pi pi-refresh"
                             className="p-button-secondary"
                             onClick={() => reset()}
-                            disabled={loadingSubmit || loadingOrder || loadingPrediction}
+                            disabled={loadingSubmit || loadingOrder || loadingPrediction || loadingShipment}
                         />
                         <Button
                             type="submit"
                             label={loadingSubmit ? 'Submitting...' : id ? 'Update Order' : 'Create Order'}
                             icon={loadingSubmit ? 'pi pi-spin pi-spinner' : 'pi pi-check'}
-                            disabled={loadingSubmit || loadingOrder || loadingPrediction}
+                            disabled={loadingSubmit || loadingOrder || loadingPrediction || loadingShipment}
                         />
                     </div>
-
-                    {/* Error Alert */}
                     {apiError && (
                         <div className="order-form-error-message">
                             <strong>Error:</strong> {apiError}
@@ -809,6 +944,15 @@ const OrderForm = () => {
             </div>
         </div>
     );
+};
+
+OrderForm.propTypes = {
+    keycloak: PropTypes.shape({
+        token: PropTypes.string.isRequired,
+        tokenParsed: PropTypes.object,
+        updateToken: PropTypes.func.isRequired,
+        logout: PropTypes.func.isRequired,
+    }).isRequired,
 };
 
 export default OrderForm;

@@ -17,6 +17,7 @@ public class  Order {
 
     @Id
     private int id;
+    private String userId;
     private String status;
     private String shippingMethod;
     private String shippingLocation;

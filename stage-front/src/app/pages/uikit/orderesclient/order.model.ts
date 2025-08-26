@@ -48,11 +48,12 @@ export interface Order {
     totalCurrency: string;
 
     clientId: string;
-
+    clientEmail: string;
     products: OrderProduct[];
     customproductsids: string[];
 }
 export interface OrderWithDetailsRequest {
     order: Order;
+    clientEmail: string;
     customproducts: OrderDetail[];
 }

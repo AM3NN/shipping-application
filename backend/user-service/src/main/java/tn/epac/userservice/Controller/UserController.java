@@ -419,7 +419,7 @@ public class UserController {
         profile.put("city", user.getCity());
         profile.put("postalCode", user.getPostalCode());
         profile.put("country", user.getCountry());
-        profile.put("profilePhoto", user.getProfilePhoto()); // si tu veux envoyer le tableau d'octets
+        profile.put("profilePhotoPath", user.getProfilePhotoPath()); // si tu veux envoyer le tableau d'octets
         if (authenticatedUserId.equals(userId)) {
             profile.put("phoneNumber", user.getPhoneNumber());
         }

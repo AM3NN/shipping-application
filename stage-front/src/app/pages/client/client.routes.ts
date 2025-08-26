@@ -7,6 +7,7 @@ import {MyProductsComponent} from "./my-products/my-products.component";
 
 import {BillingComponent} from "./billing/billing.component";
 import {OrderesclientComponent} from "./ordersclient/orderesclient.component";
+import {TestComponent} from "../uikit/test/test.component";
 
 
 export const clientRoutes: Routes = [
@@ -19,6 +20,7 @@ export const clientRoutes: Routes = [
             { path: 'my-products', component: MyProductsComponent },
             { path: 'orders', component: OrderesclientComponent },
             { path: 'billing', component: BillingComponent },
+            { path: 'test', component: TestComponent },
         ]
     }
 

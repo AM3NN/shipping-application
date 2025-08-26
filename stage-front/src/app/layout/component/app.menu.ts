@@ -18,6 +18,7 @@ import { AppMenuitem } from './app.menuitem';
 export class AppMenu {
     model: MenuItem[] = [];
 
+
     ngOnInit() {
         this.model = [
             {
@@ -31,19 +32,19 @@ export class AppMenu {
                 items: [
                     { label: 'All Products', icon: 'pi pi-box', routerLink: ['/uikit/product'] },
                     { label: 'Warehouses', icon: 'pi pi-building', routerLink: ['/uikit/warehouse'] },
-                    { label: 'Scrapped Products', icon: 'pi pi-ban', routerLink: ['/uikit/csv'] }
+                    { label: 'Scrapped Products', icon: 'pi pi-ban', routerLink: ['/uikit/csv'] },
                 ]
             },
             {
                 label: 'Orders',
                 items: [
-                    { label: 'Orders', icon: 'pi pi-shopping-cart', routerLink: ['/uikit/test'] }
+                    { label: 'Orders', icon: 'pi pi-shopping-cart', routerLink: ['/uikit/orderss'] }
                 ]
             },
             {
                 label: 'Billing',
                 items: [
-                    { label: 'Invoices', icon: 'pi pi-file-invoice', routerLink: ['/uikit/billing/invoices'] },
+                    { label: 'Invoices', icon: 'pi pi-file-invoice', routerLink: ['/uikit/invoices'] },
 
                 ]
             },

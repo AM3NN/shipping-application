@@ -23,6 +23,8 @@ import {OrderchatbotComponent} from "./orderesclient/orderchatbot/orderchatbot.c
 import {TestComponent} from "./test/test.component";
 import {CsvvalidatorComponent} from "./csvvalidator/csvvalidator.component";
 import {ManageuserComponent} from "../user/manageuser/manageuser.component";
+import {AllordersComponent} from "./allorders/allorders.component";
+import {AllinvoicesComponent} from "./allinvoices/allinvoices.component";
 
 export default [
     { path: 'button', data: { breadcrumb: 'Button' }, component: ButtonDemo },
@@ -44,8 +46,10 @@ export default [
     { path: 'product', component: ProductComponent},
     { path: 'warehouse', component: WarehouseComponent},
     { path: 'test',  component: TestComponent},
+    { path: 'orderss', component: AllordersComponent},
     { path: 'chatorder', component: OrderchatbotComponent},
     { path: 'csv', component: CsvvalidatorComponent},
     { path: 'manageusers', component: ManageuserComponent},
+    { path: 'invoices', component: AllinvoicesComponent},
     { path: '**', redirectTo: '/notfound' }
 ] as Routes;

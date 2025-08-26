@@ -29,6 +29,7 @@ public class InvoiceController {
 
     @Autowired
     private InvoiceService invoiceService;
+
     private final OrderClient orderClient;
     private final PaymentService paymentService;
     private final InvoiceRepository invoiceRepository;
@@ -53,9 +54,7 @@ public class InvoiceController {
         return invoiceService.createInvoice(invoice);
     }
     @GetMapping
-    public List<Invoice> getAllInvoices() {
-        return invoiceService.getAllInvoices();
-    }
+
     @PostMapping("/generate/{orderId}")
     public ResponseEntity<?> generateInvoice(@PathVariable String orderId) {
         try {
@@ -82,6 +81,11 @@ public class InvoiceController {
     @GetMapping("/myinvoices/{clientId}")
     public ResponseEntity<List<Invoice>> getMyInvoices(@PathVariable String clientId) {
         List<Invoice> invoices = invoiceService.getMyInvoices(clientId);
+        return ResponseEntity.ok(invoices);
+    }
+    @GetMapping("/all")
+    public ResponseEntity<List<Invoice>> getAllInvoices() {
+        List<Invoice> invoices = invoiceService.getAllInvoices();
         return ResponseEntity.ok(invoices);
     }
     @GetMapping("/download/{invoiceId}")

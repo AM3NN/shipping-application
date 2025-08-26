@@ -1,20 +1,22 @@
 import {
   BaseComponent
-} from "./chunk-BQ5HZ4GH.js";
-import "./chunk-YTM2XVB2.js";
+} from "./chunk-JJCIJZIB.js";
+import "./chunk-2VJNW2GT.js";
 import {
   BaseStyle
-} from "./chunk-7LNFHKT3.js";
+} from "./chunk-HEYIDR4C.js";
 import {
   SharedModule
-} from "./chunk-ZJVO2KXO.js";
+} from "./chunk-TLEJQAJD.js";
 import "./chunk-GFVF2TMO.js";
+import "./chunk-US7LRVFB.js";
+import "./chunk-PXYLXCRT.js";
 import {
   CommonModule,
   NgClass,
   NgStyle
-} from "./chunk-T2RWXMUG.js";
-import "./chunk-XHVIWP5A.js";
+} from "./chunk-UCCE5RQP.js";
+import "./chunk-B5QHEHR4.js";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -35,16 +37,14 @@ import {
   ɵɵelement,
   ɵɵgetInheritedFactory,
   ɵɵproperty
-} from "./chunk-4V5QSODL.js";
+} from "./chunk-RFZ2BTTM.js";
 import "./chunk-WPM5VTLQ.js";
 import "./chunk-PEBH6BBU.js";
 import "./chunk-4S3KYZTJ.js";
-import "./chunk-US7LRVFB.js";
-import "./chunk-PXYLXCRT.js";
 import {
   __spreadProps,
   __spreadValues
-} from "./chunk-7RSYZEEK.js";
+} from "./chunk-WDMUDEB6.js";
 
 // node_modules/primeng/fesm2022/primeng-skeleton.mjs
 var theme = ({

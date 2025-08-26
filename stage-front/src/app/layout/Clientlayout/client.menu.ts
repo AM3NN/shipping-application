@@ -39,13 +39,15 @@ export class AppClientMenu {
                 label: 'Orders',
                 items: [
                     { label: 'My Orders', icon: 'pi pi-shopping-cart', routerLink: ['/client/orders'] },
+                    { label: 'AI Order Assist', icon: 'pi pi-comments', routerLink: ['/client/test'] },
+
                 ],
             },
             {
                 label: 'Billing',
                 items: [
                     { label: 'My Billings', icon: 'pi pi-credit-card', routerLink: ['/client/billing'] },
-                    { label: 'Payment History', icon: 'pi pi-history', routerLink: ['/client/payment-history'] },
+
                 ],
             },
             {

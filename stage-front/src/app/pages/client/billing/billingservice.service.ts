@@ -31,6 +31,19 @@ export class BillingserviceService {
                 return throwError(() => new Error('Impossible de récupérer les factures.'));
             })
         );}
+    getallInvoices(): Observable<Invoice[]> {
+        return this.getHeaders().pipe(
+            switchMap(headers =>
+                this.http.get<Invoice[]>(`${this.apiUrl}/all`, {  // Utilisation de path variable
+                    headers,
+                    withCredentials: true
+                })
+            ),
+            catchError(err => {
+                console.error('Erreur lors de la récupération des factures:', err);
+                return throwError(() => new Error('Impossible de récupérer les factures.'));
+            })
+        );}
 
 
     payInvoice(invoiceId: string, paymentIntentId: string): Observable<Invoice> {

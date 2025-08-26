@@ -49,6 +49,7 @@ export class OrderService {
                 from(this.keycloakService.loadUserProfile()).pipe(
                     switchMap(profile => {
                         payload.order.clientId = profile.id ?? '';
+                        payload.order.clientEmail = profile.email ?? '';
 
                         return this.http.post<Order>(`${this.baseUrl}`, payload, {
                             headers,

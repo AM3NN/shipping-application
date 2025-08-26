@@ -213,6 +213,7 @@ export class OrderesclientComponent implements OnInit {
             totalAmount: 0,
             totalCurrency: 'USD',
             clientId: '',
+            clientEmail:'',
             products: [],
             customproductsids :[],
         };
@@ -267,7 +268,8 @@ export class OrderesclientComponent implements OnInit {
         } else {
             const payload: OrderWithDetailsRequest = {
                 order: this.order,
-                customproducts: this.customproducts
+                customproducts: this.customproducts,
+                clientEmail:this.order.clientEmail,
             };
 
             this.orderService.createOrder(payload).subscribe({
@@ -369,6 +371,6 @@ export class OrderesclientComponent implements OnInit {
     }
 
     generateInvoice(order: any) {
-        
+
     }
 }

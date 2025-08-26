@@ -36,6 +36,7 @@ public class OrderDTO {
     private BigDecimal totalAmount;
     private String totalCurrency;
     private String clientId;
+    private String clientEmail;
     // Liste des produits de la commande
     private List<OrderProductDTO> products;
     private List<OrderDetailDTO> customproducts;

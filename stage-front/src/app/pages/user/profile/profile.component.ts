@@ -45,7 +45,7 @@ export class ProfileComponent implements OnInit {
         country: '',
         street:'',
         profilePhoto: new Uint8Array(),
-        profilePhotoPath: ''
+
     };
     editMode: boolean = false;
     profilePhotoPreview: string | ArrayBuffer | null = null;

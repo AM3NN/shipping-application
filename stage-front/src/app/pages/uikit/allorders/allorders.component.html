@@ -1,0 +1,297 @@
+<div class="card no-padding-card">
+    <p-menubar [model]="nestedMenuItems">
+        <ng-template #end>
+            <p-iconfield>
+                <p-inputicon class="pi pi-search"></p-inputicon>
+                <input type="text" pInputText placeholder="Search" />
+            </p-iconfield>
+        </ng-template>
+    </p-menubar>
+
+    <div class="card noo-padding-card">
+        <div class="button-toolbar">
+            <div class="left-buttons">
+                <p-button label="New order" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()"></p-button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<br/>
+<br/>
+<p-table [value]="orders" selectionMode="single" [(selection)]="selectedOrder">
+    <ng-template pTemplate="header">
+        <tr>
+            <th>Status</th>
+            <th>Reference</th>
+            <th>Type</th>
+            <th>Total Amount</th>
+            <th>Client</th>
+            <th>Actions</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-order>
+        <tr>
+            <td>{{order.status}}</td>
+            <td>{{order.reference}}</td>
+            <td>{{order.type}}</td>
+            <td>{{order.totalAmount | currency: order.totalCurrency}}</td>
+            <td>{{order.clientEmail}}</td>
+            <td>
+                <p-button icon="pi pi-trash" (onClick)="deleteOrder(order)" class="p-button-text p-button-danger"></p-button>
+            </td>
+
+
+        </tr>
+    </ng-template>
+</p-table>
+
+<!-- Dialog pour ajouter / modifier une commande -->
+<p-dialog
+    [header]="isEdit ? 'Edit Order' : 'New Order'"
+    [(visible)]="orderDialog"
+    [modal]="true"
+    [style]="{ width: '67vw', maxWidth: '950px' }"
+    [baseZIndex]="10000"
+    [draggable]="false"
+    [resizable]="false"
+    styleClass="p-fluid order-dialog">
+
+    <div class="two-columns">
+        <div>
+            <div class="field">
+                <label>Method</label>
+                <p-dropdown
+                    id="method"
+                    [options]="methodOptions"
+                    [(ngModel)]="order.shippingMethod"
+                    placeholder="Select shipping method"
+                    optionLabel="label"
+                    optionValue="value">
+                </p-dropdown>
+            </div>
+            <div class="field">
+                <label for="shippingLocation">Shipping Location</label>
+                <input id="shippingLocation" type="text" pInputText [(ngModel)]="order.shippingLocation" />
+            </div>
+            <div class="field">
+                <label for="deliveryLocation">Delivery Location</label>
+                <input id="deliveryLocation" type="text" pInputText [(ngModel)]="order.deliveryLocation" />
+            </div>
+        </div>
+
+        <div>
+            <div class="field">
+                <label for="type">Type</label>
+                <p-dropdown
+                    id="type"
+                    [options]="typeOptions"
+                    [(ngModel)]="order.type"
+                    placeholder="Select Type"
+                    optionLabel="label"
+                    optionValue="value">
+                </p-dropdown>
+            </div>
+            <div class="field">
+                <label for="direction">Direction</label>
+                <p-dropdown
+                    id="direction"
+                    [options]="directionOptions"
+                    [(ngModel)]="order.direction"
+                    placeholder="Select Direction"
+                    optionLabel="label"
+                    optionValue="value">
+                </p-dropdown>
+            </div>
+            <div class="field">
+                <label for="expectedDate">Expected Date</label>
+                <p-calendar id="expectedDate" [(ngModel)]="order.expectedDate" dateFormat="yy-mm-dd"></p-calendar>
+            </div>
+        </div>
+    </div>
+
+    <div class="field">
+        <label>Products & Quantities</label>
+        <p-multiSelect
+            [options]="productOptions"
+            [(ngModel)]="selectedProducts"
+            optionLabel="name"
+            optionValue="id"
+            filter="true"
+            placeholder="Select Products"
+            (onChange)="onProductsChange()"
+            display="chip"
+            styleClass="custom-product-select">
+        </p-multiSelect>
+    </div>
+
+    <div class="selected-products-list">
+        <div class="product-item" *ngFor="let prod of order.products; let i = index" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <input type="number"
+                   [(ngModel)]="prod.quantity"
+                   (ngModelChange)="calculateTotals()"
+                   min="1"
+                   class="quantity-input"
+                   [attr.aria-label]="'Quantity for ' + prod.product.name" />
+            <span>{{ prod.product.name }}</span>
+        </div>
+    </div>
+
+
+
+
+    <div class="mb-2">
+        <p-button label="Add  a custom product" icon="pi pi-plus" (onClick)="addCustomProduct()"></p-button>
+    </div>
+
+    <div *ngFor="let detail of customproducts; let i = index" class="custom-detail-card">
+        <h4>Detail {{ i + 1 }}</h4>
+
+        <div class="fields-two-columns">
+            <div class="field">
+                <label>Binding Type</label>
+                <p-dropdown
+                    [options]="bindingTypeOptions"
+                    [(ngModel)]="detail.bindingType"
+                    placeholder="Select Binding Type">
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Quantity</label>
+                <p-inputNumber [(ngModel)]="detail.quantity" [min]="1"></p-inputNumber>
+            </div>
+
+            <div class="field">
+                <label>Perforation</label>
+                <p-dropdown
+                    [options]="binaryOptions"
+                    [(ngModel)]="detail.perf"
+                    placeholder="True or false">
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Security Label</label>
+                <p-dropdown
+                    [options]="binaryOptions"
+                    [(ngModel)]="detail.securityLabel"
+                    placeholder="True or false"
+                >
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Shrinkwrap</label>
+                <p-dropdown
+                    [options]="binaryOptions"
+                    [(ngModel)]="detail.shrinkwrap"
+                    placeholder="True or false">
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Three Hole Drill</label>
+                <p-dropdown
+                    [options]="binaryOptions"
+                    [(ngModel)]="detail.threeHoleDrill"
+                    placeholder="True or false">
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Cover Finish Type</label>
+                <p-dropdown
+                    [options]="coverFinishTypeOptions"
+                    [(ngModel)]="detail.coverFinishType"
+                    placeholder="Select Cover Finish">
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Text Color</label>
+                <p-dropdown
+                    [options]="textColorOptions"
+                    [(ngModel)]="detail.textColor"
+                    placeholder="Select Text Color">
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Siren</label>
+                <p-dropdown
+                    [options]="sirenOptions"
+                    [(ngModel)]="detail.siren"
+                    placeholder="Select Siren">
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Text Paper Type</label>
+                <p-dropdown
+                    [options]="textPaperTypeOptions"
+                    [(ngModel)]="detail.textPaperType"
+                    placeholder="Select Paper Type">
+                </p-dropdown>
+            </div>
+
+            <div class="field">
+                <label>Production Page</label>
+                <p-inputNumber [(ngModel)]="detail.productionPage" [min]="0"></p-inputNumber>
+            </div>
+
+            <div class="field">
+                <label>Thickness (mm)</label>
+                <p-inputNumber [(ngModel)]="detail.thickness" [min]="0"></p-inputNumber>
+            </div>
+
+            <div class="field">
+                <label>Height (mm)</label>
+                <p-inputNumber [(ngModel)]="detail.height" [min]="0"></p-inputNumber>
+            </div>
+
+            <div class="field">
+                <label>Width (mm)</label>
+                <p-inputNumber [(ngModel)]="detail.width" [min]="0"></p-inputNumber>
+            </div>
+
+            <div class="field">
+                <label>Weight (g)</label>
+                <p-inputNumber [(ngModel)]="detail.weight" [min]="0"></p-inputNumber>
+            </div>
+        </div>
+
+        <p-button label="Remove" icon="pi pi-trash" severity="danger" (onClick)="removeCustomProduct(i)"></p-button>
+    </div>
+
+    <div class="three-columns">
+        <div class="field">
+            <label>Net Amount</label>
+            <input type="text" pInputText [(ngModel)]="order.netAmount" disabled />
+        </div>
+        <div class="field">
+            <label>Tax</label>
+            <input type="text" pInputText [(ngModel)]="order.tax" disabled />
+        </div>
+        <div class="field">
+            <label>Total Amount</label>
+            <input type="text" pInputText [(ngModel)]="order.totalAmount" disabled />
+        </div>
+    </div>
+
+
+
+    <ng-template pTemplate="footer">
+        <p-button label="Cancel" icon="pi pi-times" (onClick)="hideDialog()" class="p-button-text p-button-secondary"></p-button>
+        <p-button label="Save" icon="pi pi-check" (onClick)="saveOrder()" class="p-button-success"></p-button>
+    </ng-template>
+</p-dialog>
+
+
+
+
+
+
+
+
+

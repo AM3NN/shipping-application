@@ -1,0 +1,117 @@
+<div class="invoice-cards-container p-grid p-nogutter p-justify-between">
+    <!-- Total Invoices -->
+    <div class="grid grid-cols-12 gap-8">
+        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+            <p-card class="stat-card mb-0">
+                <div class="flex justify-between mb-4">
+                    <div>
+                        <span class="text-muted block mb-2">Total Invoices</span>
+                        <div class="text-surface font-medium text-xl">{{ totalInvoices }}</div>
+                    </div>
+                    <div class="flex items-center justify-center bg-gray-100 rounded-circle" style="width: 2.5rem; height: 2.5rem">
+                        <i class="pi pi-file text-gray-500 text-xl"></i>
+                    </div>
+                </div>
+                <span class="text-primary font-medium">24 new</span>
+                <span class="text-muted">since last visit</span>
+            </p-card>
+        </div>
+
+        <!-- Paid -->
+        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+            <p-card class="stat-card mb-0">
+                <div class="flex justify-between mb-4">
+                    <div>
+                        <span class="text-muted block mb-2">Paid</span>
+                        <div class="text-surface font-medium text-xl">{{ totalPaid }} ({{ totalPaidAmount | currency:'USD' }})</div>
+                    </div>
+                    <div class="flex items-center justify-center bg-blue-100 rounded-circle" style="width: 2.5rem; height: 2.5rem">
+                        <i class="pi pi-check-circle text-blue-500 text-xl"></i>
+                    </div>
+                </div>
+                <span class="text-primary font-medium">52%+</span>
+                <span class="text-muted">since last week</span>
+            </p-card>
+        </div>
+
+        <!-- Unpaid -->
+        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+            <p-card class="stat-card mb-0">
+                <div class="flex justify-between mb-4">
+                    <div>
+                        <span class="text-muted block mb-2">Unpaid</span>
+                        <div class="text-surface font-medium text-xl">{{ totalUnpaid }} ({{ totalUnpaidAmount | currency:'USD' }})</div>
+                    </div>
+                    <div class="flex items-center justify-center bg-red-100 rounded-circle" style="width: 2.5rem; height: 2.5rem">
+                        <i class="pi pi-times-circle text-red-500 text-xl"></i>
+                    </div>
+                </div>
+                <span class="text-primary font-medium">10</span>
+                <span class="text-muted">overdue</span>
+            </p-card>
+        </div>
+
+        <!-- Total Amount -->
+        <div class="col-span-12 lg:col-span-6 xl:col-span-3">
+            <p-card class="stat-card mb-0">
+                <div class="flex justify-between mb-4">
+                    <div>
+                        <span class="text-muted block mb-2">Total Amount</span>
+                        <div class="text-surface font-medium text-xl">{{ totalAmount | currency:'USD' }}</div>
+                    </div>
+                    <div class="flex items-center justify-center bg-orange-100 rounded-circle" style="width: 2.5rem; height: 2.5rem">
+                        <i class="pi pi-dollar text-orange-500 text-xl"></i>
+                    </div>
+                </div>
+                <span class="text-primary font-medium">5 new</span>
+                <span class="text-muted">since last month</span>
+            </p-card>
+        </div>
+    </div>
+
+</div>
+<br>
+
+
+
+<p-table
+    [value]="invoices"
+    [paginator]="true"
+    [rows]="10"
+    [loading]="loading"
+    sortMode="multiple"
+    responsiveLayout="scroll"
+    class="p-datatable-gridlines">
+
+    <ng-template pTemplate="header">
+        <tr>
+            <th pSortableColumn="orderId">Order Ref <p-sortIcon field="orderId"></p-sortIcon></th>
+            <th pSortableColumn="totalAmount">Amount <p-sortIcon field="totalAmount"></p-sortIcon></th>
+            <th pSortableColumn="issueDate">Issue Date <p-sortIcon field="issueDate"></p-sortIcon></th>
+            <th>Paid</th>
+            <th>Customer</th>
+            <th>Actions</th>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-invoice>
+        <tr>
+            <td>{{ invoice.orderRef }}</td>
+            <td>{{ invoice.totalAmount | currency:'USD' }}</td>
+            <td>{{ invoice.issueDate | date }}</td>
+
+            <td>
+                <p-tag [value]="invoice.paid ? 'Paid' : 'Unpaid'" [severity]="invoice.paid ? 'success' : 'danger'"></p-tag>
+            </td>
+            <td>{{ invoice.customerEmail }}</td>
+            <td>
+                <button pButton type="button" icon="pi pi-eye" class="p-button-text p-mr-2" (click)="viewInvoice(invoice)"></button>
+                <button pButton type="button" icon="pi pi-download" class="p-button-text p-mr-2" (click)="downloadInvoice(invoice.id)"></button>
+            </td>
+        </tr>
+    </ng-template>
+</p-table>
+
+
+
+
